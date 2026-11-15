@@ -114,8 +114,8 @@ details summary{cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
 .fx.strip.glow{border-radius:.4cqw}
 .fx-name{position:absolute;transform:translateX(-50%);font-size:clamp(9.5px,1.45cqw,12.5px);line-height:1.35;color:#e8f0f8;background:rgb(8 13 22 / .72);padding:1px 7px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:24cqw}
 .fx-name.up{transform:translate(-50%,-100%)}
-.fx-name.left{transform:none}
-.fx-name.right{transform:translateX(-100%)}
+.fx-name.up.left{transform:translateY(-100%)}
+.fx-name.up.right{transform:translate(-100%,-100%)}
 .scene-empty{position:absolute;inset:0;display:grid;place-items:center;color:#9fb1c5;font-size:14px;text-align:center;padding:16px}
 .anim,.anim .glow{transition-property:color,opacity,transform,background-color,box-shadow;transition-timing-function:linear}
 .pv{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;min-width:0}
@@ -531,12 +531,12 @@ function nameHtml(o){
   if(o.k==='none') return '';
   const s=o.slot,n=esc(o.p.l.name||'Light '+o.p.id);
   let x=o.k==='strip'?50:s.x,top,max='';
-  if(o.k==='ceiling'){top=`calc(${s.drop}cqw + 5.4cqw)`;const n2=PLACED.filter(q=>q.k==='ceiling').length;if(n2>1)max=`max-width:${Math.max(9,76/(n2-1)-1).toFixed(1)}%;`}
-  // table lamps and the strip: just above the lamp; floor lamps: on the floor beside the foot
-  let cls='';
-  if(o.k==='table'){top=`calc(${s.y}% - 8.1cqw - 4px)`;cls=' up'}
-  else if(o.k==='strip'){top='calc(49.2% - 0.6cqw - 4px)';cls=' up'}
-  else if(o.k==='floor'){top='calc(68.5% + 4px)';cls=x<50?' left':' right';x=x<50?1.5:98.5;max='max-width:40cqw;'}
+  if(o.k==='ceiling'){top=`calc(${s.drop}cqw - 3px)`;const n2=PLACED.filter(q=>q.k==='ceiling').length;if(n2>1)max=`max-width:${Math.max(9,76/(n2-1)-1).toFixed(1)}%;`}
+  // always just above the lamp (ceiling lights: over the shade, on the cord)
+  let cls=' up';
+  if(o.k==='table') top=`calc(${s.y}% - 8.1cqw - 4px)`;
+  else if(o.k==='strip') top='calc(49.2% - 0.6cqw - 4px)';
+  else if(o.k==='floor'){top='calc(27% - 4px)';cls+=x<50?' left':' right';x=x<50?1.5:98.5;max='max-width:30cqw;'}
   return `<span class="fx-name${cls}" style="left:${x}%;top:${top};${max}">${n}</span>`;
 }
 let PLACED=[];
