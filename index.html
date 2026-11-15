@@ -79,6 +79,8 @@ ol.steps{padding-left:22px;margin:8px 0}
 ol.steps li{margin:6px 0}
 code{font:12.5px ui-monospace,Menlo,Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px;word-break:break-all}
 .kv code{background:none;padding:0}
+.banner .steps li{margin:8px 0}
+.banner .btn,.banner button{margin:2px 0}
 .banner{font-size:13px;border:1px dashed var(--line);border-radius:8px;padding:8px 10px;margin-top:10px;color:var(--muted)}
 details summary{cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
 .mt{margin-top:10px}.mt0{margin-top:0}
@@ -164,6 +166,19 @@ footer p{margin:4px 0}
     <button id="loadBridge" class="primary">Load from bridge</button>
   </div>
   <div class="msg" id="bridgeMsg"></div>
+  <div class="banner" id="viaTab" hidden>
+    <b>On a phone, or if “Load from bridge” doesn't work:</b>
+    <ol class="steps">
+      <li><a class="btn" id="openData" target="_blank" rel="noopener noreferrer">Open my bridge data ↗</a><br>Your bridge shows your lights as text in a new tab.</li>
+      <li>Select all of that text and copy it.</li>
+      <li>Come back here and <button class="primary" id="pasteClip">Paste from clipboard</button></li>
+    </ol>
+    <div class="msg" id="clipMsg"></div>
+    <details><summary>Why?</summary>
+      <p class="hint mt0">Browsers don't let a website talk to devices in your home network in the background, and on phones there's no way to allow it. Opening a page yourself is fine. Your tag isn't affected: your app talks to the bridge directly.</p>
+      <p class="hint">Worth a try on a computer: open <a id="certLink" target="_blank" rel="noopener noreferrer">your bridge over https</a>, accept the certificate warning, come back and tap “Load from bridge”.</p>
+    </details>
+  </div>
   <details class="mt">
     <summary>No username yet?</summary>
     <ol class="steps">
@@ -180,7 +195,6 @@ footer p{margin:4px 0}
     <div class="row mt"><button id="readPaste" class="primary">Read JSON</button><button id="clearData">Clear loaded data</button></div>
     <div class="msg" id="pasteMsg"></div>
   </details>
-  <div class="banner" id="liveNote" hidden></div>
 </section>
 
 <section class="card">
@@ -347,16 +361,41 @@ function base(real){const ip=$('#ip').value.trim(),u=$('#user').value.trim();
   if(real&&(!ip||!u)) return null;
   return `http://${ip||'<bridge-ip>'}/api/${u||'<username>'}`}
 const hosted=location.protocol==='https:';
+let scheme='';// what worked last time on the website: 'https' (the bridge's own certificate accepted) or ''
 async function call(method,url,body){
-  // targetAddressSpace: newer Chrome then asks you to allow access to devices on your network, which can let this
-  // hosted page reach the bridge directly. Other browsers ignore it.
-  const r=await fetch(url,{method,body:body===undefined?undefined:JSON.stringify(body),targetAddressSpace:'local'});
+  // targetAddressSpace: newer desktop Chrome then asks to allow access to devices on your network. Other browsers
+  // ignore it. On the website, the bridge's https address is tried first: a secure page may only talk to https,
+  // which works once its certificate warning has been accepted in this browser.
+  const opts={method,body:body===undefined?undefined:JSON.stringify(body),targetAddressSpace:'local'};
+  if(hosted&&url.startsWith('http://')){
+    try{const r=await fetch('https://'+url.slice(7),opts);scheme='https';return r.json()}catch(e){if(scheme==='https')throw e}
+  }
+  const r=await fetch(url,opts);
   return r.json();
 }
-function liveErr(e){
-  return hosted?'Your browser blocked the request to your bridge (secure websites usually can’t reach devices at home). If your browser asked about access to your local network, allow it and try again. Otherwise download this page (link at the bottom) and open the file on a device on your home Wi-Fi.'
-    :'Couldn’t reach the bridge ('+e.message+'). Check the IP and that you’re on the same Wi-Fi.';
+function liveErr(e,sending){
+  if(!hosted) return 'Couldn’t reach the bridge ('+e.message+'). Check the IP and that you’re on the same Wi-Fi.';
+  return sending?'This website can’t send to your bridge from here (normal on phones). Your tag isn’t affected: test it in your app.'
+    :'This website can’t reach your bridge directly (normal on phones). Use “Open my bridge data” below instead.';
 }
+// the way around on a phone: open the bridge's data yourself, copy it, paste it back
+function updateLinks(){
+  const b=base(true),ip=$('#ip').value.trim();
+  const a=$('#openData');if(b){a.href=b;a.removeAttribute('aria-disabled')}else{a.removeAttribute('href');a.setAttribute('aria-disabled','true')}
+  const c=$('#certLink');if(ip)c.href=`https://${ip}/api/config`;else c.removeAttribute('href');
+}
+$('#openData').addEventListener('click',e=>{if(!base(true)){e.preventDefault();const m=$('#clipMsg');m.className='msg err';m.textContent='Enter the bridge IP and username first.'}});
+$('#pasteClip').onclick=async()=>{
+  const m=$('#clipMsg');m.className='msg';
+  let text;
+  try{text=await navigator.clipboard.readText()}catch(e){
+    const d=$('#paste').closest('details');d.open=true;$('#paste').focus();
+    m.textContent='Your browser didn’t hand over the clipboard: paste it into the box below and tap “Read JSON”.';return}
+  try{const obj=JSON.parse(text);
+    if(obj&&obj.lights&&obj.groups){S.lights={};S.groups={}} // the whole bridge: replaces what was loaded
+    const r=ingest(obj);m.className='msg ok';m.textContent=`Loaded ${Object.keys(S.lights).length} lights and ${Object.keys(S.groups).length} rooms/groups.`;render();
+  }catch(e){m.className='msg err';m.textContent=e instanceof SyntaxError?'What’s on the clipboard isn’t the bridge’s data. Copy all of the text in the tab that opened, then try again.':e.message}
+};
 $('#loadBridge').onclick=async()=>{
   const m=$('#bridgeMsg'),b=base(true);m.className='msg';
   if(!b){m.className='msg err';m.textContent='Enter the bridge IP and username first.';return}
@@ -375,7 +414,8 @@ $('#readPaste').onclick=()=>{
   catch(e){m.className='msg err';m.textContent=e instanceof SyntaxError?'That isn’t valid JSON: copy the whole Command Response box.':e.message}
 };
 $('#clearData').onclick=()=>{S.lights={};S.groups={};S.selL.clear();S.selG.clear();store.del('hue_data');store.del('hue_sel');$('#pasteMsg').textContent='Cleared.';render()};
-['ip','user'].forEach(k=>{const el=$('#'+k);el.value=store.get('hue_'+k)||'';el.oninput=()=>{store.set('hue_'+k,el.value.trim());renderOutput()}});
+['ip','user'].forEach(k=>{const el=$('#'+k);el.value=store.get('hue_'+k)||'';el.oninput=()=>{store.set('hue_'+k,el.value.trim());updateLinks();renderOutput()}});
+updateLinks();
 
 /* ---------- targets ---------- */
 function itemHtml(kind,id,name,sub,st,sel){const s=swatch(st);
@@ -666,7 +706,7 @@ function showRes(el,data,err){
 async function sendOne(i){const r=REQ[i],el=$('#res-r'+i);
   if(!base(true)){showRes(el,null,'Enter the bridge IP and username at the top first.');return false}
   el.style.color='';el.textContent='Sending…';
-  try{showRes(el,await call(r.method,r.url,r.body));return true}catch(e){showRes(el,null,liveErr(e));return false}}
+  try{showRes(el,await call(r.method,r.url,r.body));return true}catch(e){showRes(el,null,liveErr(e,true));return false}}
 $('#output').addEventListener('click',async e=>{
   const t=e.target;
   if(t.dataset.copy!==undefined||t.dataset.copyId){const txt=t.dataset.copyId?$('#'+t.dataset.copyId).textContent:t.dataset.copy;
@@ -681,7 +721,7 @@ $('#output').addEventListener('click',async e=>{
       if(r[0]&&r[0].success){const id=String(r[0].success.id);S.groups[id]={name,type:'LightGroup',lights:ids,state:{any_on:false},action:{}};
         store.set('hue_data',JSON.stringify({lights:S.lights,groups:S.groups}));S.selL.clear();S.selG.add(id);render();}
       else{m.className='msg err';m.textContent='Bridge says: '+(r[0]&&r[0].error?r[0].error.description:'unknown error')}
-    }catch(err){m.className='msg err';m.textContent=liveErr(err)}}
+    }catch(err){m.className='msg err';m.textContent=hosted?'This website can’t create the group from here (normal on phones). Use “Do it by hand in the CLIP debugger” below.':liveErr(err)}}
 });
 let rt;function refreshSoon(){clearTimeout(rt);rt=setTimeout(async()=>{const b=base(true);if(!b)return;
   try{const [l,g]=await Promise.all([call('GET',b+'/lights'),call('GET',b+'/groups')]);ingest(l);ingest(g);render()}catch(e){}},600)}
@@ -696,8 +736,7 @@ function render(){keepSelection();renderTargets();renderAction();renderPreview()
 (function init(){
   try{const d=JSON.parse(store.get('hue_data')||'null');if(d){S.lights=d.lights||{};S.groups=d.groups||{}}}catch(e){}
   try{const d=JSON.parse(store.get('hue_sel')||'null');if(d){S.selL=new Set((d.lights||[]).map(String));S.selG=new Set((d.groups||[]).map(String))}}catch(e){}
-  if(hosted){const n=$('#liveNote');n.hidden=false;
-    n.innerHTML='On this website, most browsers won’t let the page talk to your bridge: paste your JSON below to build the requests. Recent Chrome may ask to allow access to devices on your local network: then <b>Load</b> and <b>Send now</b> work here too. Otherwise <a href="index.html" download="hue-nfc-builder.html">download this page</a> and open the file on a device on your home Wi-Fi.'}
+  $('#viaTab').hidden=!hosted;
   render();
 })();
 </script>

@@ -55,16 +55,19 @@ repository, and GitHub Pages serves exactly that file at hue.piogino.ch.
 About the username: it's the key the bridge gives an app when you press its button. Anyone on your home network who
 has it can control your lights, so treat it like a password. It only works inside your home network.
 
-## Hosted page or downloaded file?
+## On a phone
 
-Your bridge talks plain `http://` on your home network, and secure (`https://`) websites usually aren't allowed to
-reach it. So:
+Your bridge talks plain `http://` inside your home network, and browsers don't let a secure (`https://`) website
+talk to it in the background; on phones there's no way to allow it. So on hue.piogino.ch, "Load from bridge" and
+"Send now" usually don't work on a phone. That doesn't affect your tag: the app on your phone talks to the bridge
+directly. To get your lights into the page instead:
 
-- **On hue.piogino.ch** you can always build requests by pasting the JSON from the bridge's CLIP debugger (the page
-  explains how). Recent versions of Chrome may ask whether the page may access devices on your local network; if you
-  allow it, the live buttons ("Load from bridge", "Send now") work there too.
-- **Download the page** (link at the bottom of it) and open the file on a computer or phone on your home Wi-Fi:
-  then the live buttons work in any browser.
+1. Enter the bridge IP and username, tap **Open my bridge data**: your bridge shows your lights as text in a new tab.
+2. Select all of it and copy it.
+3. Come back and tap **Paste from clipboard**.
+
+On a computer, two more ways may work: some bridges also answer over `https` (open it once and accept the
+certificate warning), and you can download the page and open the file while on your home Wi-Fi.
 
 ## Getting a username
 
