@@ -48,6 +48,8 @@ repository, and GitHub Pages serves exactly that file at hue.piogino.ch.
   group"), and those go straight from your browser to the bridge address you typed in.
 - **Nothing is loaded from elsewhere.** No analytics, no tracking, no fonts or scripts from other sites. A
   Content-Security-Policy in the page enforces this: the browser refuses to load anything that isn't in the file.
+- **The clipboard** is only read after you tapped "Open my bridge data" (when you come back to the page) or "Paste
+  from clipboard", only in your browser, and only to look for your bridge's data. Anything else on it is ignored.
 - **What's stored, and where:** your bridge IP, the username (API key), the list of your lights, which ones you
   selected and the app you chose are kept in your browser's localStorage, so you don't have to enter them again. They never leave your device. "Clear loaded data"
   removes the light list; clearing the site data in your browser removes everything.
@@ -63,8 +65,9 @@ talk to it in the background; on phones there's no way to allow it. So on hue.pi
 directly. To get your lights into the page instead:
 
 1. Enter the bridge IP and username, tap **Open my bridge data**: your bridge shows your lights as text in a new tab.
-2. Select all of it and copy it.
-3. Come back and tap **Paste from clipboard**.
+2. Copy all of it: long-press the text, **Select all**, **Copy** (on an iPhone, double-tap a word first).
+3. Come back to the page: your lights usually appear by themselves (Android Chrome asks once whether the page may read
+   the clipboard). If not, tap **Paste from clipboard**.
 
 On a computer, two more ways may work: some bridges also answer over `https` (open it once and accept the
 certificate warning), and you can download the page and open the file while on your home Wi-Fi.

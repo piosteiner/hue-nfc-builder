@@ -170,8 +170,8 @@ footer p{margin:4px 0}
     <b>On a phone, or if “Load from bridge” doesn't work:</b>
     <ol class="steps">
       <li><a class="btn" id="openData" target="_blank" rel="noopener noreferrer">Open my bridge data ↗</a><br>Your bridge shows your lights as text in a new tab.</li>
-      <li>Select all of that text and copy it.</li>
-      <li>Come back here and <button class="primary" id="pasteClip">Paste from clipboard</button></li>
+      <li>Copy all of that text. Android: long-press any of it, tap <b>Select all</b>, then <b>Copy</b>. iPhone: double-tap a word, tap <b>Select All</b>, then <b>Copy</b>.</li>
+      <li>Come back to this tab: your lights usually appear by themselves. If not, tap <button class="primary" id="pasteClip">Paste from clipboard</button></li>
     </ol>
     <div class="msg" id="clipMsg"></div>
     <details><summary>Why?</summary>
@@ -384,17 +384,31 @@ function updateLinks(){
   const a=$('#openData');if(b){a.href=b;a.removeAttribute('aria-disabled')}else{a.removeAttribute('href');a.setAttribute('aria-disabled','true')}
   const c=$('#certLink');if(ip)c.href=`https://${ip}/api/config`;else c.removeAttribute('href');
 }
-$('#openData').addEventListener('click',e=>{if(!base(true)){e.preventDefault();const m=$('#clipMsg');m.className='msg err';m.textContent='Enter the bridge IP and username first.'}});
+// after "Open my bridge data": when you come back to this tab, the clipboard is read once by itself (browsers that
+// allow it without a tap, e.g. Chrome on Android after asking once); if it holds the bridge's data, it's loaded
+let awaitingClip=false;
+$('#openData').addEventListener('click',e=>{if(!base(true)){e.preventDefault();const m=$('#clipMsg');m.className='msg err';m.textContent='Enter the bridge IP and username first.';return}awaitingClip=true});
+function loadBridgeText(text){
+  const obj=JSON.parse(text);
+  if(obj&&obj.lights&&obj.groups){S.lights={};S.groups={}} // the whole bridge: replaces what was loaded
+  ingest(obj);render();
+  const m=$('#clipMsg');m.className='msg ok';m.textContent=`Loaded ${Object.keys(S.lights).length} lights and ${Object.keys(S.groups).length} rooms/groups.`;
+}
+async function tryClipboard(){
+  if(!awaitingClip||document.visibilityState!=='visible'||!document.hasFocus()) return;
+  let text;
+  try{text=await navigator.clipboard.readText()}catch(e){if(e&&e.name==='NotAllowedError'&&navigator.permissions){try{const q=await navigator.permissions.query({name:'clipboard-read'});if(q.state==='denied')awaitingClip=false}catch(_){}}return}
+  try{loadBridgeText(text);awaitingClip=false;$('#targets').closest('.card').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){/* not the bridge's data (yet): wait for the next return or the button */}
+}
+document.addEventListener('visibilitychange',()=>setTimeout(tryClipboard,250));
+addEventListener('focus',()=>setTimeout(tryClipboard,250));
 $('#pasteClip').onclick=async()=>{
   const m=$('#clipMsg');m.className='msg';
   let text;
   try{text=await navigator.clipboard.readText()}catch(e){
     const d=$('#paste').closest('details');d.open=true;$('#paste').focus();
     m.textContent='Your browser didn’t hand over the clipboard: paste it into the box below and tap “Read JSON”.';return}
-  try{const obj=JSON.parse(text);
-    if(obj&&obj.lights&&obj.groups){S.lights={};S.groups={}} // the whole bridge: replaces what was loaded
-    const r=ingest(obj);m.className='msg ok';m.textContent=`Loaded ${Object.keys(S.lights).length} lights and ${Object.keys(S.groups).length} rooms/groups.`;render();
-  }catch(e){m.className='msg err';m.textContent=e instanceof SyntaxError?'What’s on the clipboard isn’t the bridge’s data. Copy all of the text in the tab that opened, then try again.':e.message}
+  try{loadBridgeText(text);awaitingClip=false}catch(e){m.className='msg err';m.textContent=e instanceof SyntaxError?'What’s on the clipboard isn’t the bridge’s data. Copy all of the text in the tab that opened, then try again.':e.message}
 };
 $('#loadBridge').onclick=async()=>{
   const m=$('#bridgeMsg'),b=base(true);m.className='msg';
