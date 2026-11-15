@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Everything is in this one file: no scripts, fonts or images from anywhere else, no tracking. The only network
+     requests it makes are the ones you trigger, to the bridge address you enter. The policy below enforces that the
+     page can't load anything from outside (connect-src has to allow any http/https address, since your bridge can
+     be at any IP on your network). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src http: https:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Hue NFC Command Builder</title>
+<meta name="description" content="Build the Philips Hue requests for an NFC tag (MacroDroid, Tasker), with a preview of how your lights will look. Runs entirely in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='26' r='18' fill='%23f0a050'/%3E%3Crect x='24' y='46' width='16' height='10' rx='3' fill='%239a968e'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1c1a;--muted:#6d6a64;--line:#e4e1da;--accent:#d97a22;--accent-ink:#fff;--ok:#2f8a4e;--err:#c0392b;--code:#f1efe9;--room:#2a2724}
+@media (prefers-color-scheme:dark){:root{--bg:#161514;--card:#201f1d;--ink:#eeebe5;--muted:#9a968e;--line:#363430;--accent:#f0a050;--accent-ink:#1a1306;--code:#2a2826;--ok:#5cc47f;--err:#ef7a6b;--room:#121110}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:4px 0 2px}
+.sub{color:var(--muted);margin:0 0 18px}
+a{color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;flex:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);flex:1;min-width:170px}
+/* 16px: phones zoom in on smaller fields */
+input[type=text],textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-height:100px;resize:vertical}
+button,.btn{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{border-color:var(--muted)}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:600}
+button.small{padding:4px 9px;font-size:13px}
+.msg{font-size:13px;margin-top:8px;min-height:1em;color:var(--muted)}
+.msg.ok{color:var(--ok)}.msg.err{color:var(--err)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:8px}
+.item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;user-select:none;background:var(--card);min-height:48px}
+.item:hover{border-color:var(--muted)}
+.item.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:color-mix(in srgb,var(--accent) 8%,var(--card))}
+.dot{width:22px;height:22px;border-radius:50%;flex:none;border:1px solid var(--line)}
+.dot.off{background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 6px)}
+.item .n{font-weight:600;font-size:14px;line-height:1.2}
+.item .t{font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;border-radius:0;padding:7px 14px;background:var(--bg)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.opt{display:flex;align-items:center;gap:10px;margin:12px 0;flex-wrap:wrap}
+.opt .lbl{min-width:96px;font-size:14px}
+.opt input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+.opt .val{font-variant-numeric:tabular-nums;color:var(--muted);min-width:64px;font-size:13px}
+#ct{background:linear-gradient(90deg,#cfdcff,#fff4e0,#ffb15c);height:6px;border-radius:3px;appearance:none;-webkit-appearance:none}
+#ct::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
+#ct::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
+input[type=color]{width:52px;height:36px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--bg)}
+input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px;vertical-align:-3px}
+.req{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.req .hd{display:flex;gap:8px;align-items:center;padding:8px 10px;background:var(--code);flex-wrap:wrap}
+.req .lab{font-weight:600;font-size:13px;margin-right:auto}
+.m{font:700 11.5px ui-monospace,monospace;padding:2px 6px;border-radius:5px;background:var(--accent);color:var(--accent-ink)}
+.kv{padding:8px 10px;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:6px 8px;align-items:start}
+.kv .k{font-size:12px;color:var(--muted);padding-top:2px}
+.kv code{font:12.5px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.res{font:12px ui-monospace,monospace;padding:0 10px 8px}
+.hint{font-size:13px;color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;padding:4px 0}
+.sectionlabel{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;display:flex;align-items:center;gap:8px}
+.sectionlabel:first-child{margin-top:0}
+.sectionlabel .sp{margin-left:auto;display:flex;gap:6px;text-transform:none;letter-spacing:0}
+ol.steps{padding-left:22px;margin:8px 0}
+ol.steps li{margin:6px 0}
+code{font:12.5px ui-monospace,Menlo,Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px;word-break:break-all}
+.kv code{background:none;padding:0}
+.banner{font-size:13px;border:1px dashed var(--line);border-radius:8px;padding:8px 10px;margin-top:10px;color:var(--muted)}
+details summary{cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
+.mt{margin-top:10px}.mt0{margin-top:0}
+
+/* the preview: a dark "room" with one bulb per light */
+.pv-tools{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.pv-tools label{font-size:14px;display:flex;gap:6px;align-items:center;cursor:pointer}
+.room{background:radial-gradient(ellipse at 50% 0%,#24211e,var(--room) 70%);border-radius:12px;padding:18px 12px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:18px 10px}
+.pv{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;min-width:0}
+.pv .pair{display:flex;align-items:center;gap:8px;height:84px}
+.pv .arrow{color:#6d6a64;font-size:13px}
+.pv .n{color:#eeebe5;font-size:13px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.pv .t{color:#9a968e;font-size:11.5px;line-height:1.3}
+.pv .t.warn{color:#f0a050}
+.bulb{--s:46px;position:relative;width:var(--s);height:var(--s);border-radius:50%;background-color:#3a3734;flex:none;transition-property:background-color,box-shadow,opacity;transition-timing-function:linear}
+.bulb::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 38% 32%,rgb(255 255 255 / .55),rgb(255 255 255 / 0) 55%)}
+.bulb::before{content:"";position:absolute;left:50%;bottom:-9px;width:16px;height:9px;transform:translateX(-50%);background:#55524d;border-radius:0 0 4px 4px}
+.bulb.small{--s:30px}
+.bulb.small::before{width:11px;height:6px;bottom:-6px}
+.room .none{color:#9a968e;font-size:14px;grid-column:1/-1;text-align:center;padding:12px}
+
+footer{max-width:980px;margin:0 auto;padding:0 16px 30px;font-size:13px;color:var(--muted)}
+footer p{margin:4px 0}
+
+@media (pointer:coarse){button.small{padding:8px 12px}.seg button{padding:10px 14px}button,.btn{padding:10px 14px}}
+@media (max-width:520px){
+  .opt .lbl{min-width:0;width:100%}
+  .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));width:100%}
+  .seg button{padding-left:6px;padding-right:6px}
+  .kv{grid-template-columns:minmax(0,1fr) auto}
+  .kv .k{grid-column:1/-1;padding-top:4px}
+  .room{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){.bulb{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>Hue NFC Command Builder</h1>
+<p class="sub">Pick lights or rooms, choose what should happen, preview it, and copy the request into MacroDroid or Tasker for your NFC tag.</p>
+
+<section class="card">
+  <h2><span class="step">1</span> Your bridge</h2>
+  <div class="row">
+    <label class="f">Bridge IP<input type="text" id="ip" placeholder="192.168.1.20" autocomplete="off" inputmode="decimal" spellcheck="false"></label>
+    <label class="f">Username (API key)<input type="text" id="user" placeholder="AbC123xYz…" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
+    <button id="loadBridge" class="primary">Load from bridge</button>
+  </div>
+  <div class="msg" id="bridgeMsg"></div>
+  <details class="mt">
+    <summary>No username yet?</summary>
+    <ol class="steps">
+      <li>Open <code>http://&lt;bridge-ip&gt;/debug/clip.html</code> in a browser on your home Wi-Fi.</li>
+      <li>URL <code>/api</code>, body <code>{"devicetype":"nfc_tags#phone"}</code>.</li>
+      <li>Press the round button on the bridge, then <b>POST</b> within 30 seconds.</li>
+      <li>The response contains <code>"username": "…"</code>: that's your key. Keep it private; anyone on your network with it can control your lights.</li>
+    </ol>
+  </details>
+  <details>
+    <summary>…or paste the JSON you got from the CLIP debugger</summary>
+    <p class="hint">Paste the response of <code>/api/&lt;username&gt;/lights</code>, <code>/groups</code>, or the full <code>/api/&lt;username&gt;</code>. You can paste lights and groups one after the other: they get merged.</p>
+    <textarea id="paste" placeholder='{"1":{"state":{"on":true,"bri":254,...},"type":"Extended color light","name":"Desk lamp",...}}'></textarea>
+    <div class="row mt"><button id="readPaste" class="primary">Read JSON</button><button id="clearData">Clear loaded data</button></div>
+    <div class="msg" id="pasteMsg"></div>
+  </details>
+  <div class="banner" id="liveNote" hidden></div>
+</section>
+
+<section class="card">
+  <h2><span class="step">2</span> What should the tag control?</h2>
+  <div id="targets"><div class="empty">Load or paste your bridge data first.</div></div>
+</section>
+
+<section class="card">
+  <h2><span class="step">3</span> What should happen?</h2>
+  <div class="opt"><span class="lbl">Power</span>
+    <div class="seg" id="power"><button data-v="on" class="on">Turn on</button><button data-v="off">Turn off</button></div>
+  </div>
+  <div id="onOpts">
+    <div class="opt" id="briRow"><span class="lbl"><label><input type="checkbox" id="useBri" checked> Brightness</label></span>
+      <input type="range" id="bri" min="1" max="254" value="254"><span class="val" id="briVal">100%</span></div>
+    <div class="opt" id="colRow"><span class="lbl">Colour</span>
+      <div class="seg" id="cmode"><button data-v="none" class="on">Keep as is</button><button data-v="ct">White tone</button><button data-v="xy">Colour</button></div>
+    </div>
+    <div class="opt" id="ctRow" hidden><span class="lbl">White tone</span>
+      <input type="range" id="ct" min="153" max="500" value="366"><span class="val" id="ctVal"></span></div>
+    <div class="opt" id="xyRow" hidden><span class="lbl">Colour</span>
+      <input type="color" id="color" value="#ff7a2e"><span class="hint">Only colour bulbs react to this.</span></div>
+    <div class="hint" id="capHint"></div>
+  </div>
+  <div class="opt"><span class="lbl"><label><input type="checkbox" id="useTr"> Fade</label></span>
+    <input type="range" id="tr" min="0" max="10" step="0.5" value="2"><span class="val" id="trVal">2 s</span></div>
+</section>
+
+<section class="card">
+  <h2><span class="step">4</span> Preview</h2>
+  <div class="pv-tools">
+    <button id="playFade">▶ Play it</button>
+    <label><input type="checkbox" id="pvBefore" checked> Show before → after</label>
+  </div>
+  <div class="room" id="preview"><div class="none">Select a light or room to see it here.</div></div>
+  <p class="hint">Each bulb shows what <i>that</i> light can do: a white bulb ignores a colour, colour bulbs only reach the colours their hardware can make. A screen can't show light exactly, so take the colours as a close guide.</p>
+</section>
+
+<section class="card">
+  <h2><span class="step">5</span> Requests for your tag</h2>
+  <div id="output"><div class="empty">Select at least one light or room.</div></div>
+</section>
+</main>
+
+<footer>
+  <p>Runs entirely in your browser. Your bridge IP, username and light list are kept only in this browser's storage; the page sends nothing anywhere except the requests you trigger, straight to your bridge. No tracking, nothing loaded from other sites.</p>
+  <p>Open source: <a href="https://github.com/piosteiner/hue-nfc-builder">github.com/piosteiner/hue-nfc-builder</a> · <a href="index.html" download="hue-nfc-builder.html">Download this page</a> to use it offline or on your home network. Not affiliated with Philips or Signify.</p>
+</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const S={lights:{},groups:{},selL:new Set(),selG:new Set(),power:'on',cmode:'none'};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=(a,b)=>(+a)-(+b);
+
+/* ---------- colour helpers ---------- */
+function gam(v){return v<=0.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-0.055}
+function ungam(v){return v>0.04045?Math.pow((v+0.055)/1.055,2.4):v/12.92}
+function xyToRgb(x,y){
+  if(!y) return [255,241,214];
+  const Y=1,X=Y/y*x,Z=Y/y*(1-x-y);
+  let r=X*1.656492-Y*0.354851-Z*0.255038,g=-X*0.707196+Y*1.655397+Z*0.036152,b=X*0.051713-Y*0.121364+Z*1.01153;
+  [r,g,b]=[r,g,b].map(v=>Math.max(0,v));const mx=Math.max(r,g,b)||1;
+  return [r,g,b].map(v=>Math.round(gam(v/mx)*255));
+}
+const xyToCss=(x,y)=>'rgb('+xyToRgb(x,y).join(',')+')';
+function hexToXy(hex){
+  const n=parseInt(hex.slice(1),16);let r=ungam((n>>16&255)/255),g=ungam((n>>8&255)/255),b=ungam((n&255)/255);
+  const X=r*0.664511+g*0.154324+b*0.162028,Y=r*0.283881+g*0.668433+b*0.047685,Z=r*0.000088+g*0.07231+b*0.986039,s=X+Y+Z;
+  return s?[+(X/s).toFixed(4),+(Y/s).toFixed(4)]:[0.3127,0.329];
+}
+function mix(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t))}
+function ctToRgb(m){const t=Math.min(1,Math.max(0,(m-153)/347));return t<.5?mix([207,220,255],[255,244,224],t*2):mix([255,244,224],[255,177,92],(t-.5)*2)}
+const ctToCss=m=>`rgb(${ctToRgb(m)})`;
+function swatch(st){
+  if(!st||!st.on) return {cls:'dot off',style:''};
+  let col='#fff1d6';
+  if(st.colormode==='xy'&&st.xy) col=xyToCss(st.xy[0],st.xy[1]);
+  else if(st.colormode==='ct'&&st.ct) col=ctToCss(st.ct);
+  else if(st.colormode==='hs'&&st.xy) col=xyToCss(st.xy[0],st.xy[1]);
+  const o=st.bri!=null?(0.35+0.65*st.bri/254):1;
+  return {cls:'dot',style:`background:${col};opacity:${o.toFixed(2)}`};
+}
+
+/* ---------- what a bulb can do: colour range (gamut) and white range ---------- */
+const GAMUTS={A:[[0.704,0.296],[0.2151,0.7106],[0.138,0.08]],B:[[0.675,0.322],[0.409,0.518],[0.167,0.04]],C:[[0.6915,0.3083],[0.17,0.7],[0.1532,0.0475]]};
+function gamutOf(l){const c=l&&l.capabilities&&l.capabilities.control;if(!c)return GAMUTS.C;
+  if(Array.isArray(c.colorgamut)&&c.colorgamut.length===3)return c.colorgamut;return GAMUTS[c.colorgamuttype]||GAMUTS.C}
+function ctRangeOf(l){const c=l&&l.capabilities&&l.capabilities.control&&l.capabilities.control.ct;return c&&c.min&&c.max?[c.min,c.max]:[153,500]}
+// the bridge moves a colour a bulb can't make to the nearest one it can: the closest point of its triangle
+function clampXy(p,tri){
+  const cross=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+  const [A,B,C]=tri,d1=cross(A,B,p),d2=cross(B,C,p),d3=cross(C,A,p);
+  if(!((d1<0||d2<0||d3<0)&&(d1>0||d2>0||d3>0))) return p;
+  const near=(a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));return[a[0]+t*dx,a[1]+t*dy]};
+  const dist=q=>(q[0]-p[0])**2+(q[1]-p[1])**2;
+  return [near(A,B),near(B,C),near(C,A)].sort((a,b)=>dist(a)-dist(b))[0].map(v=>+v.toFixed(4));
+}
+
+/* ---------- data ---------- */
+function caps(l){const s=(l&&l.state)||{};return{bri:'bri' in s,ct:'ct' in s,xy:'xy' in s}}
+function groupMembers(id){return id==='0'?Object.keys(S.lights):((S.groups[id]&&S.groups[id].lights)||[])}
+function groupCaps(id){
+  const m=groupMembers(id).filter(x=>S.lights[x]);
+  if(!m.length) return {bri:true,ct:true,xy:true};
+  const c={bri:false,ct:false,xy:false};m.forEach(x=>{const k=caps(S.lights[x]);c.bri||=k.bri;c.ct||=k.ct;c.xy||=k.xy});return c;
+}
+function groupName(id){return id==='0'?'All lights':(S.groups[id]?S.groups[id].name:'Group '+id)}
+function shortType(t){return({'Extended color light':'Colour','Color light':'Colour','Color temperature light':'White ambiance','Dimmable light':'White','On/Off plug-in unit':'Plug','On/Off light':'On/off'})[t]||t||'Light'}
+
+function ingest(obj){
+  if(Array.isArray(obj)){if(obj[0]&&obj[0].error) throw new Error('Bridge says: '+obj[0].error.description);throw new Error('That JSON is a list, not lights or groups.')}
+  if(!obj||typeof obj!=='object') throw new Error('Not a JSON object.');
+  let nl=0,ng=0;
+  const take=(o)=>{for(const [id,v] of Object.entries(o||{})){if(!v||typeof v!=='object')continue;
+    if(Array.isArray(v.lights)){S.groups[id]=v;ng++}else if(v.state&&('on' in v.state)){S.lights[id]=v;nl++}}};
+  if(obj.lights&&!Array.isArray(obj.lights)&&typeof obj.lights==='object'&&(obj.groups||obj.config)){take(obj.lights);take(obj.groups)}
+  else take(obj);
+  if(!nl&&!ng) throw new Error('No lights or groups found in that JSON.');
+  store.set('hue_data',JSON.stringify({lights:S.lights,groups:S.groups}));
+  return {nl,ng};
+}
+
+/* ---------- bridge ---------- */
+function base(real){const ip=$('#ip').value.trim(),u=$('#user').value.trim();
+  if(real&&(!ip||!u)) return null;
+  return `http://${ip||'<bridge-ip>'}/api/${u||'<username>'}`}
+const hosted=location.protocol==='https:';
+async function call(method,url,body){
+  // targetAddressSpace: newer Chrome then asks you to allow access to devices on your network, which can let this
+  // hosted page reach the bridge directly. Other browsers ignore it.
+  const r=await fetch(url,{method,body:body===undefined?undefined:JSON.stringify(body),targetAddressSpace:'local'});
+  return r.json();
+}
+function liveErr(e){
+  return hosted?'Your browser blocked the request to your bridge (secure websites usually can’t reach devices at home). If your browser asked about access to your local network, allow it and try again. Otherwise download this page (link at the bottom) and open the file on a device on your home Wi-Fi.'
+    :'Couldn’t reach the bridge ('+e.message+'). Check the IP and that you’re on the same Wi-Fi.';
+}
+$('#loadBridge').onclick=async()=>{
+  const m=$('#bridgeMsg'),b=base(true);m.className='msg';
+  if(!b){m.className='msg err';m.textContent='Enter the bridge IP and username first.';return}
+  m.textContent='Loading…';
+  try{
+    const [l,g]=await Promise.all([call('GET',b+'/lights'),call('GET',b+'/groups')]);
+    S.lights={};S.groups={};const a=ingest(l),c=ingest(g);
+    m.className='msg ok';m.textContent=`Loaded ${a.nl} lights and ${c.ng} rooms/groups.`;render();
+  }catch(e){m.className='msg err';m.textContent=e.message.startsWith('Bridge says')?e.message:liveErr(e)}
+};
+$('#readPaste').onclick=()=>{
+  const m=$('#pasteMsg');
+  try{const r=ingest(JSON.parse($('#paste').value));m.className='msg ok';
+    m.textContent=`Added ${r.nl} lights and ${r.ng} groups. Now ${Object.keys(S.lights).length} lights, ${Object.keys(S.groups).length} groups loaded.`;
+    $('#paste').value='';render();}
+  catch(e){m.className='msg err';m.textContent=e instanceof SyntaxError?'That isn’t valid JSON: copy the whole Command Response box.':e.message}
+};
+$('#clearData').onclick=()=>{S.lights={};S.groups={};S.selL.clear();S.selG.clear();store.del('hue_data');$('#pasteMsg').textContent='Cleared.';render()};
+['ip','user'].forEach(k=>{const el=$('#'+k);el.value=store.get('hue_'+k)||'';el.oninput=()=>{store.set('hue_'+k,el.value.trim());renderOutput()}});
+
+/* ---------- targets ---------- */
+function itemHtml(kind,id,name,sub,st,sel){const s=swatch(st);
+  return `<div class="item${sel?' sel':''}" role="button" tabindex="0" aria-pressed="${sel}" data-kind="${kind}" data-id="${esc(id)}"><span class="${s.cls}" style="${s.style}"></span><div><div class="n">${esc(name)}</div><div class="t">${esc(sub)}</div></div></div>`}
+function renderTargets(){
+  const lIds=Object.keys(S.lights).sort(num),gIds=Object.keys(S.groups).sort(num);
+  if(!lIds.length&&!gIds.length){$('#targets').innerHTML='<div class="empty">Load or paste your bridge data first.</div>';return}
+  let h='';
+  const groups=(lIds.length?['0']:[]).concat(gIds);
+  if(groups.length){
+    h+=`<div class="sectionlabel">Rooms &amp; groups</div><div class="grid">`;
+    for(const id of groups){
+      const g=S.groups[id]||{},mem=groupMembers(id);
+      const anyOn=g.state?g.state.any_on:mem.some(x=>S.lights[x]&&S.lights[x].state.on);
+      const st=Object.assign({},g.action||{},{on:anyOn});
+      h+=itemHtml('g',id,groupName(id),`${id==='0'?'Everything':(g.type||'Group')} · ${mem.length} light${mem.length==1?'':'s'} · ${anyOn?'on':'off'}`,st,S.selG.has(id));
+    }
+    h+='</div>';
+  }
+  if(lIds.length){
+    h+=`<div class="sectionlabel">Individual lights<span class="sp"><button class="small" id="allL">All</button><button class="small" id="noneL">None</button></span></div><div class="grid">`;
+    const roomOf={};for(const gid of gIds){const g=S.groups[gid];if(g.type==='Room')(g.lights||[]).forEach(x=>roomOf[x]=g.name)}
+    for(const id of lIds){const l=S.lights[id];
+      h+=itemHtml('l',id,l.name||('Light '+id),[roomOf[id],shortType(l.type),l.state.reachable===false?'unreachable':(l.state.on?'on':'off')].filter(Boolean).join(' · '),l.state,S.selL.has(id))}
+    h+='</div>';
+  }
+  $('#targets').innerHTML=h;
+  const a=$('#allL'),n=$('#noneL');
+  if(a)a.onclick=()=>{lIds.forEach(x=>S.selL.add(x));render()};
+  if(n)n.onclick=()=>{S.selL.clear();render()};
+}
+function toggleItem(it){const set=it.dataset.kind==='g'?S.selG:S.selL,id=it.dataset.id;set.has(id)?set.delete(id):set.add(id);render()}
+$('#targets').addEventListener('click',e=>{const it=e.target.closest('.item');if(it)toggleItem(it)});
+$('#targets').addEventListener('keydown',e=>{const it=e.target.closest('.item');if(it&&(e.key==='Enter'||e.key===' ')){e.preventDefault();const k=it.dataset.kind+it.dataset.id;toggleItem(it);const again=[...document.querySelectorAll('#targets .item')].find(x=>x.dataset.kind+x.dataset.id===k);if(again)again.focus()}});
+
+/* ---------- action ---------- */
+function segInit(sel,key){$(sel).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S[key]=b.dataset.v;
+  $(sel).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));render()})}
+segInit('#power','power');segInit('#cmode','cmode');
+['useBri','bri','ct','color','useTr','tr'].forEach(k=>$('#'+k).addEventListener('input',render));
+function selCaps(){const c={bri:false,ct:false,xy:false},add=k=>{c.bri||=k.bri;c.ct||=k.ct;c.xy||=k.xy};
+  S.selL.forEach(id=>add(caps(S.lights[id])));S.selG.forEach(id=>add(groupCaps(id)));return c}
+function renderAction(){
+  $('#onOpts').hidden=S.power!=='on';
+  $('#briVal').textContent=Math.round($('#bri').value/254*100)+'%';
+  const m=+$('#ct').value;$('#ctVal').textContent=Math.round(1e6/m/100)*100+' K';
+  $('#trVal').textContent=$('#tr').value+' s';
+  $('#ctRow').hidden=S.cmode!=='ct';$('#xyRow').hidden=S.cmode!=='xy';
+  const any=S.selL.size+S.selG.size>0,c=selCaps(),notes=[];
+  if(any){if(!c.bri)notes.push('none of the selected lights can dim');
+    if(S.cmode==='ct'&&!c.ct)notes.push('none of them support white tones');
+    if(S.cmode==='xy'&&!c.xy)notes.push('none of them are colour bulbs');}
+  $('#capHint').textContent=notes.length?'Heads-up: '+notes.join(', ')+'. Those settings are left out.':'';
+}
+function bodyFor(c,forceOn){
+  const tr=$('#useTr').checked?{transitiontime:Math.round(+$('#tr').value*10)}:{};
+  if(S.power==='off'&&!forceOn) return Object.assign({on:false},tr);
+  const b={on:true};
+  if($('#useBri').checked&&c.bri) b.bri=+$('#bri').value;
+  if(S.cmode==='ct'&&c.ct) b.ct=+$('#ct').value;
+  if(S.cmode==='xy'&&c.xy) b.xy=hexToXy($('#color').value);
+  return Object.assign(b,tr);
+}
+
+/* ---------- preview ---------- */
+// what a light's state becomes after a request body, as the bridge would apply it to that light
+// (the notes compare with what was asked for in step 3, since a request already leaves out what a light can't do)
+function applyBody(l,st,body){
+  const c=caps(l),out=Object.assign({},st),notes=[],want=bodyFor({bri:true,ct:true,xy:true},false);
+  if('on' in body) out.on=body.on;
+  if(!out.on) return {st:out,notes};
+  if('bri' in want&&!c.bri) notes.push('can’t dim');
+  if('bri' in body&&c.bri) out.bri=body.bri;
+  if('ct' in want&&!c.ct) notes.push(c.xy?'no white tones':c.bri?'plain white: tone stays':'');
+  if('ct' in body&&c.ct){const [lo,hi]=ctRangeOf(l);out.ct=Math.min(hi,Math.max(lo,body.ct));out.colormode='ct';if(out.ct!==body.ct)notes.push('white tone limited to its range')}
+  if('xy' in want&&!c.xy) notes.push(c.ct?'no colours: keeps its white':c.bri?'plain white: no colours':'');
+  if('xy' in body&&c.xy){const p=clampXy(body.xy,gamutOf(l));out.xy=p;out.colormode='xy';if(p[0]!==body.xy[0]||p[1]!==body.xy[1])notes.push('closest colour it can make')}
+  return {st:out,notes:notes.filter(Boolean)};
+}
+function look(l,st){
+  if(!st||!st.on||(l.state&&l.state.reachable===false)) return {bg:'#3a3734',glow:'none',op:1};
+  const c=caps(l);let rgb=[255,236,200];
+  if(c.xy&&st.colormode!=='ct'&&st.xy) rgb=xyToRgb(st.xy[0],st.xy[1]);
+  else if(c.ct&&st.ct) rgb=ctToRgb(st.ct);
+  const f=c.bri&&st.bri!=null?st.bri/254:1,col=`rgb(${rgb})`;
+  return {bg:col,glow:`0 0 ${Math.round(8+30*f)}px ${Math.round(2+12*f)}px rgb(${rgb} / ${(0.25+0.6*f).toFixed(2)})`,op:(0.45+0.55*f).toFixed(2)};
+}
+function paint(el,lk){el.style.backgroundColor=lk.bg;el.style.boxShadow=lk.glow;el.style.opacity=lk.op}
+// every light the tag touches, with its state before and after (later requests win, as on the bridge)
+function previewList(){
+  const reqs=requests(false),after={},why={},order=[];
+  for(const r of reqs){
+    const ids=r.kind==='g'?groupMembers(r.id).filter(x=>S.lights[x]):[r.id];
+    for(const id of ids){const l=S.lights[id];if(!l)continue;
+      if(!(id in after)){order.push(id);after[id]={st:Object.assign({},l.state),notes:[]}}
+      const res=applyBody(l,after[id].st,r.body);after[id]={st:res.st,notes:res.notes}}
+  }
+  return order.map(id=>({id,l:S.lights[id],before:S.lights[id].state,after:after[id].st,notes:after[id].notes}));
+}
+function renderPreview(){
+  const box=$('#preview'),list=previewList(),showBefore=$('#pvBefore').checked;
+  $('#playFade').disabled=!list.length;
+  if(!list.length){box.innerHTML='<div class="none">Select a light or room to see it here.</div>';return}
+  const small=list.length>12;
+  box.innerHTML=list.map((p,i)=>`<div class="pv"><div class="pair">${showBefore?`<span class="bulb${small?' small':''}" data-b="${i}"></span><span class="arrow">→</span>`:''}<span class="bulb${small?' small':''}" data-a="${i}"></span></div>
+    <div class="n">${esc(p.l.name||'Light '+p.id)}</div>
+    <div class="t${p.notes.length?' warn':''}">${esc(p.l.state.reachable===false?'unreachable':p.notes.length?p.notes.join(', '):(p.after.on?(p.l.state&&'bri' in p.l.state&&p.after.bri!=null?Math.round(p.after.bri/254*100)+'%':'on'):'off'))}</div></div>`).join('');
+  list.forEach((p,i)=>{const b=box.querySelector(`[data-b="${i}"]`);if(b)paint(b,look(p.l,p.before));paint(box.querySelector(`[data-a="${i}"]`),look(p.l,p.after))});
+}
+// play: the "after" bulbs start as they are now and change over the fade time (the bridge's default is 0.4 s)
+$('#playFade').onclick=()=>{
+  const list=previewList(),secs=$('#useTr').checked?+$('#tr').value:0.4;
+  const bulbs=list.map((p,i)=>[p,$('#preview').querySelector(`[data-a="${i}"]`)]).filter(x=>x[1]);
+  bulbs.forEach(([p,el])=>{el.style.transitionDuration='0s';paint(el,look(p.l,p.before))});
+  void $('#preview').offsetWidth;
+  requestAnimationFrame(()=>bulbs.forEach(([p,el])=>{el.style.transitionDuration=secs+'s';paint(el,look(p.l,p.after))}));
+};
+$('#pvBefore').addEventListener('change',renderPreview);
+
+/* ---------- output ---------- */
+function requests(forceOn){const b=base(false),out=[];
+  [...S.selG].sort(num).forEach(id=>out.push({label:'Room: '+groupName(id),method:'PUT',url:`${b}/groups/${id}/action`,body:bodyFor(groupCaps(id),forceOn),kind:'g',id}));
+  [...S.selL].sort(num).forEach(id=>out.push({label:'Light: '+(S.lights[id].name||id),method:'PUT',url:`${b}/lights/${id}/state`,body:bodyFor(caps(S.lights[id]),forceOn),kind:'l',id}));
+  return out}
+let REQ=[];
+function reqHtml(r,i,prefix){return `<div class="req"><div class="hd"><span class="m">${r.method}</span><span class="lab">${esc(r.label)}</span>
+  <button class="small" data-send="${prefix}${i}">Send now</button></div>
+  <div class="kv"><span class="k">URL</span><code>${esc(r.url)}</code><button class="small" data-copy="${esc(r.url)}">Copy</button>
+  ${r.body!==undefined?`<span class="k">Body</span><code>${esc(JSON.stringify(r.body))}</code><button class="small" data-copy="${esc(JSON.stringify(r.body))}">Copy</button>`:''}</div>
+  <div class="res" id="res-${prefix}${i}"></div></div>`}
+function renderOutput(){
+  const o=$('#output');REQ=requests(false);
+  if(!REQ.length){o.innerHTML='<div class="empty">Select at least one light or room.</div>';return}
+  let h='';
+  if(REQ.length>1) h+=`<p class="hint mt0">${REQ.length} requests: add one <b>HTTP Request</b> action per box in MacroDroid. <button class="small" id="sendAll">Send all now</button></p>`;
+  h+=REQ.map((r,i)=>reqHtml(r,i,'r')).join('');
+  h+=`<p class="hint">In MacroDroid: Trigger <b>NFC Tag</b> → Action <b>HTTP Request</b>, method <b>PUT</b>, paste the URL, set content type <code>application/json</code> and paste the body.</p>`;
+
+  // group helper
+  if(S.selL.size>=2){const ids=[...S.selL].sort(num);
+    const body={name:($('#gname')&&$('#gname').value)||'NFC tag',type:'LightGroup',lights:ids};
+    h+=`<div class="sectionlabel">Tidier: one request instead of ${S.selL.size}</div>
+    <p class="hint mt0">Save these lights as a group on the bridge. Then one request controls them all, and toggling becomes possible.</p>
+    <div class="row"><label class="f">Group name<input type="text" id="gname" value="${esc(body.name)}"></label><button class="primary" id="mkGroup">Create group on bridge</button></div>
+    <div class="msg" id="gMsg"></div>
+    <details><summary>Do it by hand in the CLIP debugger instead</summary><div class="kv"><span class="k">POST</span><code>${esc(base(false)+'/groups')}</code><span></span><span class="k">Body</span><code id="gBody">${esc(JSON.stringify(body))}</code><button class="small" data-copy-id="gBody">Copy</button></div>
+    <p class="hint">Then GET <code>/groups</code> again and paste it above: the new group appears under Rooms &amp; groups.</p></details>`;
+  }
+
+  // toggle recipe
+  if(REQ.length===1){const r=REQ[0],b=base(false),onBody=bodyFor(r.kind==='g'?groupCaps(r.id):caps(S.lights[r.id]),true),
+      offBody=Object.assign({on:false},$('#useTr').checked?{transitiontime:Math.round(+$('#tr').value*10)}:{});
+    const getUrl=r.kind==='g'?`${b}/groups/${r.id}`:`${b}/lights/${r.id}`,needle=r.kind==='g'?'"any_on":true':'"on":true';
+    h+=`<div class="sectionlabel">Want one tag that toggles on/off?</div>
+    <ol class="steps">
+      <li>Trigger: <b>NFC Tag</b> (scan and name your tag).</li>
+      <li>Action: <b>HTTP Request</b> · GET <code>${esc(getUrl)}</code> · tick <i>Save HTTP response</i> into a string variable <code>hue_state</code>.</li>
+      <li>Action: <b>If</b> → condition <i>String variable</i> <code>hue_state</code> <b>contains</b> <code>${esc(needle)}</code></li>
+      <li>&nbsp;&nbsp;HTTP Request · PUT <code>${esc(r.url)}</code> · body <code>${esc(JSON.stringify(offBody))}</code></li>
+      <li><b>Else</b></li>
+      <li>&nbsp;&nbsp;HTTP Request · PUT <code>${esc(r.url)}</code> · body <code>${esc(JSON.stringify(onBody))}</code></li>
+      <li><b>End If</b></li>
+    </ol><p class="hint">The “on” body uses your settings from step 3, even if Power is set to off.</p>`;
+  }
+  o.innerHTML=h;
+  const gn=$('#gname');if(gn)gn.oninput=()=>{const el=$('#gBody');if(el)el.textContent=JSON.stringify({name:gn.value||'NFC tag',type:'LightGroup',lights:[...S.selL].sort(num)})};
+}
+function showRes(el,data,err){
+  if(err){el.style.color='var(--err)';el.textContent=err;return}
+  const arr=Array.isArray(data)?data:[data],bad=arr.filter(x=>x&&x.error);
+  el.style.color=bad.length?'var(--err)':'var(--ok)';
+  el.textContent=bad.length?'Error: '+bad.map(x=>x.error.description).join('; '):'✓ Done';
+}
+async function sendOne(i){const r=REQ[i],el=$('#res-r'+i);
+  if(!base(true)){showRes(el,null,'Enter the bridge IP and username at the top first.');return false}
+  el.style.color='';el.textContent='Sending…';
+  try{showRes(el,await call(r.method,r.url,r.body));return true}catch(e){showRes(el,null,liveErr(e));return false}}
+$('#output').addEventListener('click',async e=>{
+  const t=e.target;
+  if(t.dataset.copy!==undefined||t.dataset.copyId){const txt=t.dataset.copyId?$('#'+t.dataset.copyId).textContent:t.dataset.copy;
+    try{await navigator.clipboard.writeText(txt)}catch(_){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(__){}ta.remove()}
+    const o=t.textContent;t.textContent='Copied';setTimeout(()=>t.textContent=o,1200);return}
+  if(t.dataset.send){if(await sendOne(+t.dataset.send.slice(1)))refreshSoon();return}
+  if(t.id==='sendAll'){for(let i=0;i<REQ.length;i++)await sendOne(i);refreshSoon();return}
+  if(t.id==='mkGroup'){const m=$('#gMsg'),b=base(true);
+    if(!b){m.className='msg err';m.textContent='Enter the bridge IP and username at the top first.';return}
+    const ids=[...S.selL].sort(num),name=$('#gname').value||'NFC tag';
+    try{const r=await call('POST',b+'/groups',{name,type:'LightGroup',lights:ids});
+      if(r[0]&&r[0].success){const id=String(r[0].success.id);S.groups[id]={name,type:'LightGroup',lights:ids,state:{any_on:false},action:{}};
+        store.set('hue_data',JSON.stringify({lights:S.lights,groups:S.groups}));S.selL.clear();S.selG.add(id);render();}
+      else{m.className='msg err';m.textContent='Bridge says: '+(r[0]&&r[0].error?r[0].error.description:'unknown error')}
+    }catch(err){m.className='msg err';m.textContent=liveErr(err)}}
+});
+let rt;function refreshSoon(){clearTimeout(rt);rt=setTimeout(async()=>{const b=base(true);if(!b)return;
+  try{const [l,g]=await Promise.all([call('GET',b+'/lights'),call('GET',b+'/groups')]);ingest(l);ingest(g);render()}catch(e){}},600)}
+
+function render(){renderTargets();renderAction();renderPreview();renderOutput()}
+(function init(){
+  try{const d=JSON.parse(store.get('hue_data')||'null');if(d){S.lights=d.lights||{};S.groups=d.groups||{}}}catch(e){}
+  if(hosted){const n=$('#liveNote');n.hidden=false;
+    n.innerHTML='On this website, most browsers won’t let the page talk to your bridge: paste your JSON below to build the requests. Recent Chrome may ask to allow access to devices on your local network: then <b>Load</b> and <b>Send now</b> work here too. Otherwise <a href="index.html" download="hue-nfc-builder.html">download this page</a> and open the file on a device on your home Wi-Fi.'}
+  render();
+})();
+</script>
+</body>
+</html>
