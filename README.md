@@ -43,8 +43,8 @@ repository, and GitHub Pages serves exactly that file at hue.piogino.ch.
   group"), and those go straight from your browser to the bridge address you typed in.
 - **Nothing is loaded from elsewhere.** No analytics, no tracking, no fonts or scripts from other sites. A
   Content-Security-Policy in the page enforces this: the browser refuses to load anything that isn't in the file.
-- **What's stored, and where:** your bridge IP, the username (API key) and the list of your lights are kept in your
-  browser's localStorage, so you don't have to enter them again. They never leave your device. "Clear loaded data"
+- **What's stored, and where:** your bridge IP, the username (API key), the list of your lights, which ones you
+  selected and the app you chose are kept in your browser's localStorage, so you don't have to enter them again. They never leave your device. "Clear loaded data"
   removes the light list; clearing the site data in your browser removes everything.
 
 About the username: it's the key the bridge gives an app when you press its button. Anyone on your home network who

@@ -71,6 +71,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px;vertical-
 .empty{color:var(--muted);font-size:14px;padding:4px 0}
 .sectionlabel{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;display:flex;align-items:center;gap:8px}
 .sectionlabel:first-child{margin-top:0}
+.seltools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.seltools .sp{margin-left:auto;display:flex;gap:6px}
 .sectionlabel .sp{margin-left:auto;display:flex;gap:6px;text-transform:none;letter-spacing:0}
 ol.steps{padding-left:22px;margin:8px 0}
 ol.steps li{margin:6px 0}
@@ -198,7 +200,7 @@ footer p{margin:4px 0}
 </main>
 
 <footer>
-  <p>Runs entirely in your browser. Your bridge IP, username and light list are kept only in this browser's storage; the page sends nothing anywhere except the requests you trigger, straight to your bridge. No tracking, nothing loaded from other sites.</p>
+  <p>Runs entirely in your browser. Your bridge IP, username, light list and selection are kept only in this browser's storage; the page sends nothing anywhere except the requests you trigger, straight to your bridge. No tracking, nothing loaded from other sites.</p>
   <p>Open source: <a href="https://github.com/piosteiner/hue-nfc-builder">github.com/piosteiner/hue-nfc-builder</a> · <a href="index.html" download="hue-nfc-builder.html">Download this page</a> to use it offline or on your home network. Not affiliated with Philips or Signify.</p>
 </footer>
 
@@ -309,7 +311,7 @@ $('#readPaste').onclick=()=>{
     $('#paste').value='';render();}
   catch(e){m.className='msg err';m.textContent=e instanceof SyntaxError?'That isn’t valid JSON: copy the whole Command Response box.':e.message}
 };
-$('#clearData').onclick=()=>{S.lights={};S.groups={};S.selL.clear();S.selG.clear();store.del('hue_data');$('#pasteMsg').textContent='Cleared.';render()};
+$('#clearData').onclick=()=>{S.lights={};S.groups={};S.selL.clear();S.selG.clear();store.del('hue_data');store.del('hue_sel');$('#pasteMsg').textContent='Cleared.';render()};
 ['ip','user'].forEach(k=>{const el=$('#'+k);el.value=store.get('hue_'+k)||'';el.oninput=()=>{store.set('hue_'+k,el.value.trim());renderOutput()}});
 
 /* ---------- targets ---------- */
@@ -318,7 +320,9 @@ function itemHtml(kind,id,name,sub,st,sel){const s=swatch(st);
 function renderTargets(){
   const lIds=Object.keys(S.lights).sort(num),gIds=Object.keys(S.groups).sort(num);
   if(!lIds.length&&!gIds.length){$('#targets').innerHTML='<div class="empty">Load or paste your bridge data first.</div>';return}
-  let h='';
+  const n=S.selL.size+S.selG.size;
+  let h=`<div class="seltools"><span class="hint">${n?`${n} selected`:'Nothing selected'}</span><span class="sp"><button class="small" id="allL">Select all lights</button><button class="small" id="noneL"${n?'':' disabled'}>Unselect all</button></span></div>`;
+  if(lIds.length>1&&S.selL.size===lIds.length&&!S.selG.has('0')) h+=`<p class="hint mt0">Tip: the room <b>All lights</b> does the same with one request instead of ${lIds.length}.</p>`;
   const groups=(lIds.length?['0']:[]).concat(gIds);
   if(groups.length){
     h+=`<div class="sectionlabel">Rooms &amp; groups</div><div class="grid">`;
@@ -331,16 +335,15 @@ function renderTargets(){
     h+='</div>';
   }
   if(lIds.length){
-    h+=`<div class="sectionlabel">Individual lights<span class="sp"><button class="small" id="allL">All</button><button class="small" id="noneL">None</button></span></div><div class="grid">`;
+    h+=`<div class="sectionlabel">Individual lights</div><div class="grid">`;
     const roomOf={};for(const gid of gIds){const g=S.groups[gid];if(g.type==='Room')(g.lights||[]).forEach(x=>roomOf[x]=g.name)}
     for(const id of lIds){const l=S.lights[id];
       h+=itemHtml('l',id,l.name||('Light '+id),[roomOf[id],shortType(l.type),l.state.reachable===false?'unreachable':(l.state.on?'on':'off')].filter(Boolean).join(' · '),l.state,S.selL.has(id))}
     h+='</div>';
   }
   $('#targets').innerHTML=h;
-  const a=$('#allL'),n=$('#noneL');
-  if(a)a.onclick=()=>{lIds.forEach(x=>S.selL.add(x));render()};
-  if(n)n.onclick=()=>{S.selL.clear();render()};
+  $('#allL').onclick=()=>{lIds.forEach(x=>S.selL.add(x));render()};
+  $('#noneL').onclick=()=>{S.selL.clear();S.selG.clear();render()};
 }
 function toggleItem(it){const set=it.dataset.kind==='g'?S.selG:S.selL,id=it.dataset.id;set.has(id)?set.delete(id):set.add(id);render()}
 $('#targets').addEventListener('click',e=>{const it=e.target.closest('.item');if(it)toggleItem(it)});
@@ -545,9 +548,16 @@ $('#output').addEventListener('click',async e=>{
 let rt;function refreshSoon(){clearTimeout(rt);rt=setTimeout(async()=>{const b=base(true);if(!b)return;
   try{const [l,g]=await Promise.all([call('GET',b+'/lights'),call('GET',b+'/groups')]);ingest(l);ingest(g);render()}catch(e){}},600)}
 
-function render(){renderTargets();renderAction();renderPreview();renderOutput()}
+// the selection is kept in this browser too (only lights and rooms that still exist)
+function keepSelection(){
+  for(const id of [...S.selL]) if(!S.lights[id]) S.selL.delete(id);
+  for(const id of [...S.selG]) if(id==='0'?!Object.keys(S.lights).length:!S.groups[id]) S.selG.delete(id);
+  store.set('hue_sel',JSON.stringify({lights:[...S.selL],groups:[...S.selG]}));
+}
+function render(){keepSelection();renderTargets();renderAction();renderPreview();renderOutput()}
 (function init(){
   try{const d=JSON.parse(store.get('hue_data')||'null');if(d){S.lights=d.lights||{};S.groups=d.groups||{}}}catch(e){}
+  try{const d=JSON.parse(store.get('hue_sel')||'null');if(d){S.selL=new Set((d.lights||[]).map(String));S.selG=new Set((d.groups||[]).map(String))}}catch(e){}
   if(hosted){const n=$('#liveNote');n.hidden=false;
     n.innerHTML='On this website, most browsers won’t let the page talk to your bridge: paste your JSON below to build the requests. Recent Chrome may ask to allow access to devices on your local network: then <b>Load</b> and <b>Send now</b> work here too. Otherwise <a href="index.html" download="hue-nfc-builder.html">download this page</a> and open the file on a device on your home Wi-Fi.'}
   render();
