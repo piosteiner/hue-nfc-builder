@@ -2,6 +2,10 @@
 
 **Use it: [hue.piogino.ch](https://hue.piogino.ch)**
 
+> An independent, unofficial tool. I'm not affiliated with, endorsed by or connected to Philips, Signify or Philips
+> Hue, and this is not a Hue product. Philips and Hue are trademarks of their owners and are named only to say what
+> this tool works with.
+
 Tap your phone on an NFC tag and your Philips Hue lights do something: turn on the living room at 40 %, switch the
 desk lamp to a warm white, fade the bedroom out. This page builds the requests for that. You pick lights or rooms,
 choose what should happen, see a preview, and copy the request into the automation app that reads your tag.
@@ -74,7 +78,7 @@ reach it. So:
 
 - It uses the bridge's v1 API (`/api/<username>/…`), which every Hue bridge supports.
 - Colours on a screen are a close guide, not an exact match for light from a bulb.
-- Not affiliated with Philips or Signify. "Hue" is a trademark of Signify.
+
 
 ## Licence
 

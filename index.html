@@ -21,7 +21,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
 main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
 h1{font-size:22px;margin:4px 0 2px}
-.sub{color:var(--muted);margin:0 0 18px}
+.sub{color:var(--muted);margin:0 0 8px}
+.indie{font-size:13px;color:var(--muted);margin:0 0 18px;padding:6px 10px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0}
 a{color:var(--accent)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
 .card h2{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
@@ -149,6 +150,7 @@ footer p{margin:4px 0}
 <main>
 <h1>Hue NFC Command Builder</h1>
 <p class="sub">Pick lights or rooms, choose what should happen, preview it, and copy the request into the automation app that reads your NFC tag.</p>
+<p class="indie">An independent, unofficial tool. I'm not affiliated with Philips, Signify or Philips Hue, and this is not a Hue product.</p>
 
 <section class="card">
   <h2><span class="step">1</span> Your bridge</h2>
@@ -257,7 +259,8 @@ footer p{margin:4px 0}
 
 <footer>
   <p>Runs entirely in your browser. Your bridge IP, username, light list and selection are kept only in this browser's storage; the page sends nothing anywhere except the requests you trigger, straight to your bridge. No tracking, nothing loaded from other sites.</p>
-  <p>Open source: <a href="https://github.com/piosteiner/hue-nfc-builder">github.com/piosteiner/hue-nfc-builder</a> · <a href="index.html" download="hue-nfc-builder.html">Download this page</a> to use it offline or on your home network. Not affiliated with Philips or Signify.</p>
+  <p>Open source: <a href="https://github.com/piosteiner/hue-nfc-builder">github.com/piosteiner/hue-nfc-builder</a> · <a href="index.html" download="hue-nfc-builder.html">Download this page</a> to use it offline or on your home network.</p>
+  <p>Independent and unofficial: I'm not affiliated with, endorsed by or connected to Philips, Signify or Philips Hue. Philips and Hue are trademarks of their owners and are named here only to say what this tool works with.</p>
 </footer>
 
 <script>
