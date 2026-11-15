@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src http: https:; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Hue NFC Command Builder</title>
-<meta name="description" content="Build the Philips Hue requests for an NFC tag (MacroDroid, Tasker), with a preview of how your lights will look. Runs entirely in your browser.">
+<meta name="description" content="Build the Philips Hue requests for an NFC tag (MacroDroid, Tasker, Automate, iPhone Shortcuts), with a preview of how your lights will look. Runs entirely in your browser.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='26' r='18' fill='%232b7fd4'/%3E%3Crect x='24' y='46' width='16' height='10' rx='3' fill='%235d6e82'/%3E%3C/svg%3E">
 <style>
 :root{--bg:#f2f7fc;--card:#fff;--ink:#14212f;--muted:#5d6e82;--line:#d6e3f0;--accent:#2b7fd4;--accent-soft:#e6f1fc;--accent-ink:#fff;--ok:#24804a;--err:#c0392b;--code:#eef4fa;--room:#16202c;--room-top:#24344a}
@@ -81,6 +81,8 @@ details summary{cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
 .mt{margin-top:10px}.mt0{margin-top:0}
 
 /* the preview: a dark "room" with one bulb per light */
+.apps{border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:14px}
+.apps .hint{margin:6px 0}
 .pv-tools{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .pv-tools label{font-size:14px;display:flex;gap:6px;align-items:center;cursor:pointer}
 .room{background:radial-gradient(ellipse at 50% 0%,var(--room-top),var(--room) 70%);border-radius:12px;padding:18px 12px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:18px 10px}
@@ -105,6 +107,8 @@ footer p{margin:4px 0}
   .opt .lbl{min-width:0;width:100%}
   .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));width:100%}
   .seg button{padding-left:6px;padding-right:6px}
+  #app{grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+  #app button{border-left:0}
   .kv{grid-template-columns:minmax(0,1fr) auto}
   .kv .k{grid-column:1/-1;padding-top:4px}
   .room{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -115,7 +119,7 @@ footer p{margin:4px 0}
 <body>
 <main>
 <h1>Hue NFC Command Builder</h1>
-<p class="sub">Pick lights or rooms, choose what should happen, preview it, and copy the request into MacroDroid or Tasker for your NFC tag.</p>
+<p class="sub">Pick lights or rooms, choose what should happen, preview it, and copy the request into the automation app that reads your NFC tag.</p>
 
 <section class="card">
   <h2><span class="step">1</span> Your bridge</h2>
@@ -182,6 +186,13 @@ footer p{margin:4px 0}
 
 <section class="card">
   <h2><span class="step">5</span> Requests for your tag</h2>
+  <div class="apps">
+    <div class="opt mt0"><span class="lbl">Your app</span>
+      <div class="seg" id="app"><button data-v="macrodroid" class="on">MacroDroid</button><button data-v="tasker">Tasker</button><button data-v="automate">Automate</button><button data-v="shortcuts">iPhone Shortcuts</button></div>
+    </div>
+    <p class="hint" id="appPrice"></p>
+    <p class="hint">Any app that can react to an NFC tag and send a web request (PUT with a JSON body) works; these are just common ones. This is no advertisement: I have no connection to any of them and get nothing from them. Prices and limits can change, so check the app store.</p>
+  </div>
   <div id="output"><div class="empty">Select at least one light or room.</div></div>
 </section>
 </main>
@@ -419,6 +430,42 @@ $('#playFade').onclick=()=>{
 };
 $('#pvBefore').addEventListener('change',renderPreview);
 
+/* ---------- the automation apps: how to set each one up ---------- */
+const APPS={
+  macrodroid:{price:'Android. Free for up to 5 macros (with ads); MacroDroid Pro, a one-time purchase, removes the limit.',
+    action:'<b>HTTP Request</b> action',
+    setup:'Trigger <b>NFC Tag</b> (scan and name your tag) → Action <b>HTTP Request</b>: method <b>PUT</b>, paste the URL, content type <code>application/json</code>, paste the body.',
+    trigger:'Trigger: <b>NFC Tag</b> (scan and name your tag).',
+    get:u=>`Action: <b>HTTP Request</b> · GET <code>${u}</code> · tick <i>Save HTTP response</i> into a string variable <code>hue_state</code>.`,
+    test:n=>`Action: <b>If</b> → condition <i>String variable</i> <code>hue_state</code> <b>contains</b> <code>${n}</code>`,
+    put:'HTTP Request · PUT',else:'<b>Else</b>',end:'<b>End If</b>'},
+  tasker:{price:'Android. Paid (a one-time purchase); the developer offers a free trial on their website.',
+    action:'<b>HTTP Request</b> action in the task',
+    setup:'New profile: <b>Event → Net → NFC Tag</b> (scan your tag) → new task with <b>Net → HTTP Request</b>: method <b>PUT</b>, paste the URL, paste the body, header <code>Content-Type:application/json</code>.',
+    trigger:'Profile: <b>Event → Net → NFC Tag</b> (scan your tag), with a new task:',
+    get:u=>`<b>Net → HTTP Request</b> · GET <code>${u}</code>. The answer lands in <code>%http_data</code>.`,
+    test:n=>`<b>If</b> <code>%http_data</code> <b>~</b> <code>*${n}*</code> (matches)`,
+    put:'Net → HTTP Request · PUT',else:'<b>Else</b>',end:'<b>End If</b>'},
+  automate:{price:'Android. Free, with a limit on how many blocks can run at once; a premium upgrade removes the limit.',
+    action:'<b>HTTP request</b> block',
+    setup:'New flow: an <b>NFC tag</b> block (scan your tag) → an <b>HTTP request</b> block: method <b>PUT</b>, paste the URL, request content type <b>JSON</b> (<code>application/json</code>), paste the body.',
+    trigger:'Flow: start with an <b>NFC tag</b> block (scan your tag).',
+    get:u=>`<b>HTTP request</b> block · GET <code>${u}</code> · save the response content in a variable <code>hue_state</code>.`,
+    test:n=>`<b>Expression true?</b> block: does <code>hue_state</code> contain <code>${n}</code>?`,
+    put:'HTTP request block · PUT',else:'<b>No</b> path',end:'(both paths end the flow)',yes:'<b>Yes</b> path'},
+  shortcuts:{price:'iPhone. Free, built into iOS. NFC automations need an iPhone XS or newer.',
+    action:'<b>Get Contents of URL</b> action',
+    setup:'Shortcuts app → <b>Automation</b> → <b>NFC</b> (scan your tag, set it to run immediately) → a <b>Text</b> action with the body → <b>Get Contents of URL</b>: paste the URL, Method <b>PUT</b>, Header <code>Content-Type</code> = <code>application/json</code>, Request Body <b>File</b> → the Text.',
+    trigger:'Shortcuts → <b>Automation</b> → <b>NFC</b> (scan your tag, set it to run immediately).',
+    get:u=>`<b>Get Contents of URL</b> <code>${u}</code> (Method GET).`,
+    test:n=>`<b>If</b> <i>Contents of URL</i> <b>contains</b> <code>${n}</code>`,
+    put:'Text with the body → Get Contents of URL · PUT',else:'<b>Otherwise</b>',end:'<b>End If</b>'},
+};
+S.app=APPS[store.get('hue_app')]?store.get('hue_app'):'macrodroid';
+document.querySelectorAll('#app button').forEach(x=>x.classList.toggle('on',x.dataset.v===S.app));
+$('#app').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.app=b.dataset.v;store.set('hue_app',S.app);
+  $('#app').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderOutput()});
+
 /* ---------- output ---------- */
 function requests(forceOn){const b=base(false),out=[];
   [...S.selG].sort(num).forEach(id=>out.push({label:'Room: '+groupName(id),method:'PUT',url:`${b}/groups/${id}/action`,body:bodyFor(groupCaps(id),forceOn),kind:'g',id}));
@@ -431,12 +478,14 @@ function reqHtml(r,i,prefix){return `<div class="req"><div class="hd"><span clas
   ${r.body!==undefined?`<span class="k">Body</span><code>${esc(JSON.stringify(r.body))}</code><button class="small" data-copy="${esc(JSON.stringify(r.body))}">Copy</button>`:''}</div>
   <div class="res" id="res-${prefix}${i}"></div></div>`}
 function renderOutput(){
+  $('#appPrice').textContent=APPS[S.app].price;
   const o=$('#output');REQ=requests(false);
   if(!REQ.length){o.innerHTML='<div class="empty">Select at least one light or room.</div>';return}
   let h='';
-  if(REQ.length>1) h+=`<p class="hint mt0">${REQ.length} requests: add one <b>HTTP Request</b> action per box in MacroDroid. <button class="small" id="sendAll">Send all now</button></p>`;
+  const A=APPS[S.app];
+  if(REQ.length>1) h+=`<p class="hint mt0">${REQ.length} requests: add one ${A.action} per box. <button class="small" id="sendAll">Send all now</button></p>`;
   h+=REQ.map((r,i)=>reqHtml(r,i,'r')).join('');
-  h+=`<p class="hint">In MacroDroid: Trigger <b>NFC Tag</b> → Action <b>HTTP Request</b>, method <b>PUT</b>, paste the URL, set content type <code>application/json</code> and paste the body.</p>`;
+  h+=`<p class="hint">${A.setup}</p>`;
 
   // group helper
   if(S.selL.size>=2){const ids=[...S.selL].sort(num);
@@ -455,13 +504,13 @@ function renderOutput(){
     const getUrl=r.kind==='g'?`${b}/groups/${r.id}`:`${b}/lights/${r.id}`,needle=r.kind==='g'?'"any_on":true':'"on":true';
     h+=`<div class="sectionlabel">Want one tag that toggles on/off?</div>
     <ol class="steps">
-      <li>Trigger: <b>NFC Tag</b> (scan and name your tag).</li>
-      <li>Action: <b>HTTP Request</b> · GET <code>${esc(getUrl)}</code> · tick <i>Save HTTP response</i> into a string variable <code>hue_state</code>.</li>
-      <li>Action: <b>If</b> → condition <i>String variable</i> <code>hue_state</code> <b>contains</b> <code>${esc(needle)}</code></li>
-      <li>&nbsp;&nbsp;HTTP Request · PUT <code>${esc(r.url)}</code> · body <code>${esc(JSON.stringify(offBody))}</code></li>
-      <li><b>Else</b></li>
-      <li>&nbsp;&nbsp;HTTP Request · PUT <code>${esc(r.url)}</code> · body <code>${esc(JSON.stringify(onBody))}</code></li>
-      <li><b>End If</b></li>
+      <li>${A.trigger}</li>
+      <li>${A.get(esc(getUrl))}</li>
+      <li>${A.test(esc(needle))}</li>
+      <li>&nbsp;&nbsp;${A.yes?A.yes+': ':''}${A.put} <code>${esc(r.url)}</code> · body <code>${esc(JSON.stringify(offBody))}</code></li>
+      <li>${A.else}</li>
+      <li>&nbsp;&nbsp;${A.put} <code>${esc(r.url)}</code> · body <code>${esc(JSON.stringify(onBody))}</code></li>
+      <li>${A.end}</li>
     </ol><p class="hint">The “on” body uses your settings from step 3, even if Power is set to off.</p>`;
   }
   o.innerHTML=h;

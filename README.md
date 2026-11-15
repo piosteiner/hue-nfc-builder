@@ -4,16 +4,34 @@
 
 Tap your phone on an NFC tag and your Philips Hue lights do something: turn on the living room at 40 %, switch the
 desk lamp to a warm white, fade the bedroom out. This page builds the requests for that. You pick lights or rooms,
-choose what should happen, see a preview, and copy the request into an automation app like
-[MacroDroid](https://www.macrodroid.com/) or Tasker.
+choose what should happen, see a preview, and copy the request into the automation app that reads your tag.
 
 - **Pick** rooms, groups or single lights, loaded from your bridge or pasted as JSON.
 - **Choose** on or off, brightness, a white tone or a colour, and a fade.
 - **Preview** how every affected light will look, before and after, with the fade played back. The preview knows what
   each bulb can do: a white bulb ignores a colour, a white-ambiance bulb stays within its white range, and a colour
   bulb shows the closest colour its hardware can actually make.
-- **Copy** the URL and body into MacroDroid or Tasker. A recipe for a single tag that toggles on and off is included.
+- **Copy** the URL and body into your app, with the setup steps for that app. A recipe for a single tag that toggles on
+  and off is included.
 - **Tidy up**: several lights can be saved as one group on the bridge, so one request controls them all.
+
+## Which app?
+
+Any app that can react to an NFC tag and send a web request (a PUT with a JSON body) works. The page has setup steps
+for these:
+
+| App | Phone | Cost |
+|---|---|---|
+| MacroDroid | Android | Free for up to 5 macros (with ads); Pro is a one-time purchase |
+| Tasker | Android | Paid (one-time purchase); free trial from the developer's website |
+| Automate | Android | Free with a limit on blocks running at once; premium removes it |
+| Shortcuts | iPhone | Free, built into iOS (NFC automations need an iPhone XS or newer) |
+
+Prices and limits can change; check the app store. **This is no advertisement:** I have no connection to any of these
+apps and get nothing from them. They're just common ones that work.
+
+Whatever the app, your phone has to be on your home Wi-Fi when you tap the tag: the bridge only answers inside your
+home network.
 
 ## Is it safe?
 
