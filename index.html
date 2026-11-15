@@ -87,17 +87,43 @@ details summary{cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
 .apps .hint{margin:6px 0}
 .pv-tools{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .pv-tools label{font-size:14px;display:flex;gap:6px;align-items:center;cursor:pointer}
-.room{background:radial-gradient(ellipse at 50% 0%,var(--room-top),var(--room) 70%);border-radius:12px;padding:18px 12px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:18px 10px}
-.pv{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;min-width:0}
-.pv .pair{display:flex;align-items:center;gap:8px;height:84px}
+.room{background:var(--room);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px 16px;margin-top:10px}
+.room:empty{display:none}
+/* the room: drawn as if lit by white light; the light layer multiplies it (dark where no light falls) */
+.scene{position:relative;aspect-ratio:16/10;border-radius:12px;overflow:hidden;background:#000;container-type:inline-size;isolation:isolate}
+.room-art{position:absolute;inset:0;width:100%;height:100%;display:block}
+.light-layer{position:absolute;inset:0;background:#1b222d;mix-blend-mode:multiply}
+.pool{position:absolute;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,currentColor,rgb(0 0 0 / 0) 100%);mix-blend-mode:screen;color:#000;opacity:0}
+.fixtures{position:absolute;inset:0;pointer-events:none}
+.fx{position:absolute}
+.fx .glow{border-radius:50%;background-color:#3b4350}
+.fx.ceiling{top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center}
+.fx.ceiling .cord{width:.3cqw;background:#2a2f37}
+.fx.ceiling .shade{width:5.5cqw;height:2.6cqw;border-radius:2.8cqw 2.8cqw .4cqw .4cqw;background:#3a414c}
+.fx.ceiling .glow{width:2.4cqw;height:2.4cqw;margin-top:-.6cqw}
+.fx.table{transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center}
+.fx.table .glow{width:7cqw;height:4.2cqw;border-radius:.6cqw;clip-path:polygon(18% 0,82% 0,100% 100%,0 100%)}
+.fx.table .stem{width:.7cqw;height:3.2cqw;background:#4a4f57}
+.fx.table .foot{width:3cqw;height:.7cqw;border-radius:.4cqw;background:#4a4f57}
+.fx.floor{transform:translateX(-50%);display:flex;flex-direction:column;align-items:center}
+.fx.floor .glow{width:7.5cqw;height:5cqw;clip-path:polygon(15% 0,85% 0,100% 100%,0 100%);border-radius:.5cqw}
+.fx.floor .pole{width:.6cqw;flex:1;background:#40454d}
+.fx.floor .foot{width:5cqw;height:.9cqw;border-radius:.5cqw;background:#40454d}
+.fx.strip{height:.7cqw;transform:translateY(-50%);border-radius:.4cqw}
+.fx.strip.glow{border-radius:.4cqw}
+.scene-empty{position:absolute;inset:0;display:grid;place-items:center;color:#9fb1c5;font-size:14px;text-align:center;padding:16px}
+.anim,.anim .glow{transition-property:color,opacity,transform,background-color,box-shadow;transition-timing-function:linear}
+.pv{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;min-width:0}
+.pv .pair{grid-row:1/3}
+.pv .pair{display:flex;align-items:center;gap:6px;height:40px;padding-bottom:6px}
 .pv .arrow{color:#6b7d92;font-size:13px}
-.pv .n{color:#eef4fa;font-size:13px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
-.pv .t{color:#9fb1c5;font-size:11.5px;line-height:1.3}
+.pv .n{color:#eef4fa;font-size:13px;font-weight:600;line-height:1.25;overflow-wrap:anywhere;align-self:end}
+.pv .t{color:#9fb1c5;font-size:11.5px;line-height:1.3;align-self:start}
 .pv .t.warn{color:#8fc7ff}
 .bulb{--s:46px;position:relative;width:var(--s);height:var(--s);border-radius:50%;background-color:#34404e;flex:none;transition-property:background-color,box-shadow,opacity;transition-timing-function:linear}
 .bulb::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 38% 32%,rgb(255 255 255 / .55),rgb(255 255 255 / 0) 55%)}
 .bulb::before{content:"";position:absolute;left:50%;bottom:-9px;width:16px;height:9px;transform:translateX(-50%);background:#566476;border-radius:0 0 4px 4px}
-.bulb.small{--s:30px}
+.bulb.small{--s:26px}
 .bulb.small::before{width:11px;height:6px;bottom:-6px}
 .room .none{color:#9fb1c5;font-size:14px;grid-column:1/-1;text-align:center;padding:12px}
 
@@ -113,9 +139,10 @@ footer p{margin:4px 0}
   #app button{border-left:0}
   .kv{grid-template-columns:minmax(0,1fr) auto}
   .kv .k{grid-column:1/-1;padding-top:4px}
-  .room{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .room{grid-template-columns:1fr}
+  .scene{aspect-ratio:4/3}
 }
-@media (prefers-reduced-motion:reduce){.bulb{transition:none!important}}
+@media (prefers-reduced-motion:reduce){.bulb,.anim,.anim .glow{transition:none!important}}
 </style>
 </head>
 <body>
@@ -179,11 +206,40 @@ footer p{margin:4px 0}
 <section class="card">
   <h2><span class="step">4</span> Preview</h2>
   <div class="pv-tools">
+    <div class="seg" id="pvWhen"><button data-v="before">Before</button><button data-v="after" class="on">After</button></div>
     <button id="playFade">▶ Play it</button>
-    <label><input type="checkbox" id="pvBefore" checked> Show before → after</label>
   </div>
-  <div class="room" id="preview"><div class="none">Select a light or room to see it here.</div></div>
-  <p class="hint">Each bulb shows what <i>that</i> light can do: a white bulb ignores a colour, colour bulbs only reach the colours their hardware can make. A screen can't show light exactly, so take the colours as a close guide.</p>
+  <div class="scene" id="scene" aria-hidden="true">
+    <svg class="room-art" viewBox="0 0 160 100" preserveAspectRatio="none">
+      <rect width="160" height="68" fill="#e8e3da"/>
+      <rect y="66.5" width="160" height="2" fill="#cfc7ba"/>
+      <rect y="68.5" width="160" height="31.5" fill="#b4916f"/>
+      <path d="M0 75H160M0 83H160M0 93H160" stroke="#a07f60" stroke-width=".35"/>
+      <ellipse cx="80" cy="87" rx="46" ry="7.5" fill="#c3a586"/>
+      <rect x="63" y="18" width="34" height="19" rx=".8" fill="#8a7663"/>
+      <rect x="65" y="20" width="30" height="15" fill="#d5dde3"/>
+      <path d="M65 35l9-9 6 5 7-8 8 9v3z" fill="#9cad9c"/>
+      <circle cx="88" cy="24.5" r="2" fill="#f1e2b8"/>
+      <rect x="47" y="49" width="66" height="15" rx="3" fill="#6f7f91"/>
+      <rect x="42" y="55" width="9" height="15" rx="3" fill="#66778a"/>
+      <rect x="109" y="55" width="9" height="15" rx="3" fill="#66778a"/>
+      <rect x="48" y="60" width="64" height="9" rx="2.5" fill="#7d8ea1"/>
+      <rect x="54" y="52" width="15" height="9" rx="2.5" fill="#aab7c4"/>
+      <rect x="91" y="52" width="15" height="9" rx="2.5" fill="#c2b8a3"/>
+      <path d="M46 69.5v2.5M114 69.5v2.5" stroke="#4b3b2f" stroke-width="1.4"/>
+      <rect x="13" y="57.5" width="20" height="2.2" rx=".6" fill="#6e5747"/>
+      <path d="M15 59.7V72M31 59.7V72" stroke="#5c4839" stroke-width="1.1"/>
+      <rect x="127" y="57.5" width="20" height="2.2" rx=".6" fill="#6e5747"/>
+      <path d="M129 59.7V72M145 59.7V72" stroke="#5c4839" stroke-width="1.1"/>
+      <path d="M35 63h6l-1 7h-4z" fill="#a8674a"/>
+      <path d="M38 63c-4-4-5-9-3-12 2 3 3 7 3 12zM38 63c2-5 5-8 8-9-1 4-4 7-8 9zM38 63c-1-6 0-11 2-13 1 4 0 9-2 13z" fill="#6f8f62"/>
+    </svg>
+    <div class="light-layer" id="pools"></div>
+    <div class="fixtures" id="fixtures"></div>
+    <div class="scene-empty" id="sceneEmpty">Select a light or room to see it here.</div>
+  </div>
+  <div class="room" id="preview"></div>
+  <p class="hint">Where your lamps really are, the page can't know: a lightstrip glows behind the sofa, floor and table lamps stand where they'd usually be, everything else hangs from the ceiling. Each light does only what <i>it</i> can do: a white bulb ignores a colour, colour bulbs only reach the colours their hardware can make. A screen can't show light exactly, so take it as a close guide.</p>
 </section>
 
 <section class="card">
@@ -413,25 +469,87 @@ function previewList(){
   }
   return order.map(id=>({id,l:S.lights[id],before:S.lights[id].state,after:after[id].st,notes:after[id].notes}));
 }
-function renderPreview(){
-  const box=$('#preview'),list=previewList(),showBefore=$('#pvBefore').checked;
-  $('#playFade').disabled=!list.length;
-  if(!list.length){box.innerHTML='<div class="none">Select a light or room to see it here.</div>';return}
-  const small=list.length>12;
-  box.innerHTML=list.map((p,i)=>`<div class="pv"><div class="pair">${showBefore?`<span class="bulb${small?' small':''}" data-b="${i}"></span><span class="arrow">→</span>`:''}<span class="bulb${small?' small':''}" data-a="${i}"></span></div>
-    <div class="n">${esc(p.l.name||'Light '+p.id)}</div>
-    <div class="t${p.notes.length?' warn':''}">${esc(p.l.state.reachable===false?'unreachable':p.notes.length?p.notes.join(', '):(p.after.on?(p.l.state&&'bri' in p.l.state&&p.after.bri!=null?Math.round(p.after.bri/254*100)+'%':'on'):'off'))}</div></div>`).join('');
-  list.forEach((p,i)=>{const b=box.querySelector(`[data-b="${i}"]`);if(b)paint(b,look(p.l,p.before));paint(box.querySelector(`[data-a="${i}"]`),look(p.l,p.after))});
+// what kind of lamp it is (the bridge's archetype or product name, else the name): where it goes in the room
+function kindOf(l){
+  const a=((l.config&&l.config.archetype)||'')+' '+(l.productname||'')+' '+(l.name||'');
+  if(/plug/i.test(l.type||'')) return 'none';
+  if(/strip/i.test(a)) return 'strip';
+  if(/floor|stehlampe/i.test(a)) return 'floor';
+  if(/table|desk|bedside|nightstand|huego|hue go|bloom|iris|hueplay|hue play|tisch|nacht/i.test(a)) return 'table';
+  return 'ceiling';
 }
-// play: the "after" bulbs start as they are now and change over the fade time (the bridge's default is 0.4 s)
+const SLOTS={table:[{x:14.4,y:57.5},{x:85.6,y:57.5}],floor:[{x:4.5},{x:95.5}],strip:[{x:50}]};
+// every light gets a place: the usual spot for its kind while there's one free, the ceiling otherwise
+function placeAll(list){
+  const used={table:0,floor:0,strip:0},out=[];
+  for(const p of list){let k=kindOf(p.l);
+    if(k==='none'){out.push({p,k});continue}
+    if(k!=='ceiling'&&used[k]<SLOTS[k].length){out.push({p,k,slot:SLOTS[k][used[k]++]});continue}
+    out.push({p,k:'ceiling'})}
+  const ceil=out.filter(o=>o.k==='ceiling');
+  ceil.forEach((o,i)=>o.slot={x:ceil.length===1?50:12+76*i/(ceil.length-1),drop:i%2?11:7.5});
+  return out;
+}
+// a light's colour and strength for the room
+function lightOf(l,st){
+  if(!st||!st.on||(l.state&&l.state.reachable===false)) return null;
+  const c=caps(l);let rgb=[255,226,180];
+  if(c.xy&&st.colormode!=='ct'&&st.xy) rgb=xyToRgb(st.xy[0],st.xy[1]);
+  else if(c.ct&&st.ct) rgb=ctToRgb(st.ct);
+  return {rgb,f:c.bri&&st.bri!=null?Math.max(0.04,st.bri/254):1};
+}
+// the pool of light on the walls and floor, and the glowing part of the lamp
+function paintPool(el,o,lt){
+  const geo={ceiling:[o.slot&&o.slot.x,52,78,150],table:[o.slot&&o.slot.x,52,52,90],floor:[o.slot&&o.slot.x,34,56,120],strip:[50,47,80,48]}[o.k];
+  el.style.left=geo[0]+'%';el.style.top=geo[1]+'%';el.style.width=geo[2]+'%';el.style.height=geo[3]+'%';
+  if(!lt){el.style.opacity=0;el.style.transform='translate(-50%,-50%) scale(.6)';return}
+  el.style.color=`rgb(${lt.rgb})`;el.style.opacity=(0.3+0.7*lt.f).toFixed(3);
+  el.style.transform=`translate(-50%,-50%) scale(${(0.55+0.5*lt.f).toFixed(3)})`;
+}
+function paintGlow(el,lt){
+  if(!lt){el.style.backgroundColor='#3b4350';el.style.boxShadow='none';return}
+  const c=`rgb(${lt.rgb})`;el.style.backgroundColor=c;
+  el.style.boxShadow=`0 0 ${(1+3*lt.f).toFixed(2)}cqw ${(0.3+1.2*lt.f).toFixed(2)}cqw rgb(${lt.rgb} / ${(0.35+0.55*lt.f).toFixed(2)})`;
+}
+function fixtureHtml(o,i){
+  const s=o.slot;
+  if(o.k==='ceiling') return `<div class="fx ceiling anim" data-f="${i}" style="left:${s.x}%"><span class="cord" style="height:${s.drop}cqw"></span><span class="shade"></span><span class="glow"></span></div>`;
+  if(o.k==='table') return `<div class="fx table anim" data-f="${i}" style="left:${s.x}%;top:${s.y}%"><span class="glow"></span><span class="stem"></span><span class="foot"></span></div>`;
+  if(o.k==='floor') return `<div class="fx floor anim" data-f="${i}" style="left:${s.x}%;top:27%;bottom:31.5%"><span class="glow"></span><span class="pole"></span><span class="foot"></span></div>`;
+  if(o.k==='strip') return `<div class="fx strip glow anim" data-f="${i}" style="left:31%;right:31%;top:49.2%"></div>`;
+  return '';
+}
+let PLACED=[];
+function paintScene(when){
+  PLACED.forEach((o,i)=>{if(o.k==='none')return;const lt=lightOf(o.p.l,when==='before'?o.p.before:o.p.after);
+    const pool=$('#pools').querySelector(`[data-p="${i}"]`),fx=$('#fixtures').querySelector(`[data-f="${i}"]`);
+    if(pool)paintPool(pool,o,lt);if(fx)paintGlow(fx.classList.contains('glow')?fx:fx.querySelector('.glow'),lt)});
+}
+function setDuration(secs){document.querySelectorAll('#scene .anim, #scene .anim .glow').forEach(e=>e.style.transitionDuration=secs+'s')}
+S.pvWhen='after';
+function renderPreview(){
+  const box=$('#preview'),list=previewList();
+  $('#playFade').disabled=!list.length;
+  PLACED=placeAll(list);
+  $('#sceneEmpty').hidden=!!list.length;
+  $('#pools').innerHTML=PLACED.map((o,i)=>o.k==='none'?'':`<div class="pool anim" data-p="${i}"></div>`).join('');
+  $('#fixtures').innerHTML=PLACED.map(fixtureHtml).join('');
+  setDuration(0);paintScene(S.pvWhen);
+  // each light, before → after, with what it can't do
+  box.innerHTML=list.map((p,i)=>`<div class="pv"><div class="pair"><span class="bulb small" data-b="${i}"></span><span class="arrow">→</span><span class="bulb small" data-a="${i}"></span></div>
+    <div class="n">${esc(p.l.name||'Light '+p.id)}</div>
+    <div class="t${p.notes.length?' warn':''}">${esc(p.l.state.reachable===false?'unreachable':kindOf(p.l)==='none'?'a plug: no light of its own':p.notes.length?p.notes.join(', '):(p.after.on?(p.l.state&&'bri' in p.l.state&&p.after.bri!=null?Math.round(p.after.bri/254*100)+'%':'on'):'off'))}</div></div>`).join('');
+  list.forEach((p,i)=>{paint(box.querySelector(`[data-b="${i}"]`),look(p.l,p.before));paint(box.querySelector(`[data-a="${i}"]`),look(p.l,p.after))});
+}
+function setWhen(v){S.pvWhen=v;$('#pvWhen').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v))}
+$('#pvWhen').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setWhen(b.dataset.v);setDuration(0.4);paintScene(S.pvWhen)});
+// play: the room as it is now, then the change over the fade time (the bridge's default is 0.4 s)
 $('#playFade').onclick=()=>{
-  const list=previewList(),secs=$('#useTr').checked?+$('#tr').value:0.4;
-  const bulbs=list.map((p,i)=>[p,$('#preview').querySelector(`[data-a="${i}"]`)]).filter(x=>x[1]);
-  bulbs.forEach(([p,el])=>{el.style.transitionDuration='0s';paint(el,look(p.l,p.before))});
-  void $('#preview').offsetWidth;
-  requestAnimationFrame(()=>bulbs.forEach(([p,el])=>{el.style.transitionDuration=secs+'s';paint(el,look(p.l,p.after))}));
+  const secs=$('#useTr').checked?+$('#tr').value:0.4;
+  setWhen('after');setDuration(0);paintScene('before');
+  void $('#scene').offsetWidth;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{setDuration(secs);paintScene('after')}));
 };
-$('#pvBefore').addEventListener('change',renderPreview);
 
 /* ---------- the automation apps: how to set each one up ---------- */
 const APPS={

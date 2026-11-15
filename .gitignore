@@ -1,0 +1,4 @@
+# test screenshots and other local files
+hue/
+*.png
+!icon*.png

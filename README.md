@@ -8,9 +8,10 @@ choose what should happen, see a preview, and copy the request into the automati
 
 - **Pick** rooms, groups or single lights, loaded from your bridge or pasted as JSON.
 - **Choose** on or off, brightness, a white tone or a colour, and a fade.
-- **Preview** how every affected light will look, before and after, with the fade played back. The preview knows what
-  each bulb can do: a white bulb ignores a colour, a white-ambiance bulb stays within its white range, and a colour
-  bulb shows the closest colour its hardware can actually make.
+- **Preview** it in a little living room that your lights actually light up, before and after, with the fade played
+  back. Lightstrips glow behind the sofa, floor and table lamps stand where they usually would, other lights hang from
+  the ceiling. The preview knows what each bulb can do: a white bulb ignores a colour, a white-ambiance bulb stays
+  within its white range, and a colour bulb shows the closest colour its hardware can actually make.
 - **Copy** the URL and body into your app, with the setup steps for that app. A recipe for a single tag that toggles on
   and off is included.
 - **Tidy up**: several lights can be saved as one group on the bridge, so one request controls them all.
