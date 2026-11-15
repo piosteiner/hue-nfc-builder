@@ -11,13 +11,14 @@ desk lamp to a warm white, fade the bedroom out. This page builds the requests f
 choose what should happen, see a preview, and copy the request into the automation app that reads your tag.
 
 - **Pick** rooms, groups or single lights, loaded from your bridge or pasted as JSON.
-- **Choose** on or off, brightness, a white tone or a colour, and a fade.
+- **Choose** what a tap does: toggle (on if it's off, off if it's on; the default), turn on, or turn off, with
+  brightness, a white tone or a colour, and a fade. The Hue API has no toggle command, so for a toggle your app first
+  asks the bridge whether the light is on; the page gives you that recipe step by step.
 - **Preview** it in a little living room that your lights actually light up, before and after, with the fade played
   back. Lightstrips glow behind the sofa, floor and table lamps stand where they usually would, other lights hang from
   the ceiling. The preview knows what each bulb can do: a white bulb ignores a colour, a white-ambiance bulb stays
   within its white range, and a colour bulb shows the closest colour its hardware can actually make.
-- **Copy** the URL and body into your app, with the setup steps for that app. A recipe for a single tag that toggles on
-  and off is included.
+- **Copy** the URL and body into your app, with the setup steps for that app.
 - **Tidy up**: several lights can be saved as one group on the bridge, so one request controls them all.
 
 ## Which app?
