@@ -22,6 +22,7 @@ body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-seri
 main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
 h1{font-size:22px;margin:4px 0 2px}
 .sub{color:var(--muted);margin:0 0 8px}
+.need{font-size:14px;margin:0 0 10px}
 .indie{font-size:13px;color:var(--muted);margin:0 0 18px;padding:6px 10px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0}
 a{color:var(--accent)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
@@ -60,10 +61,6 @@ button.small{padding:4px 9px;font-size:13px}
 #ct::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
 input[type=color]{width:52px;height:36px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--bg)}
 input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px;vertical-align:-3px}
-.req{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
-.req .hd{display:flex;gap:8px;align-items:center;padding:8px 10px;background:var(--code);flex-wrap:wrap}
-.req .lab{font-weight:600;font-size:13px;margin-right:auto}
-.m{font:700 11.5px ui-monospace,monospace;padding:2px 6px;border-radius:5px;background:var(--accent);color:var(--accent-ink)}
 .kv{padding:8px 10px;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:6px 8px;align-items:start}
 .kv .k{font-size:12px;color:var(--muted);padding-top:2px}
 .kv code{font:12.5px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
@@ -79,13 +76,40 @@ ol.steps{padding-left:22px;margin:8px 0}
 ol.steps li{margin:6px 0}
 code{font:12.5px ui-monospace,Menlo,Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px;word-break:break-all}
 .kv code{background:none;padding:0}
-.banner .steps li{margin:8px 0}
-.banner .btn,.banner button{margin:2px 0}
+.fhint{font-size:12.5px;color:var(--muted)}
+.h3{font-size:14px;margin:18px 0 6px}
+ol.steps.big{padding-left:24px}
+ol.steps.big li{margin:10px 0}
+ol.steps.big .btn{margin:2px 0}
+.loadrow{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap;margin:10px 0 0}
+#getKey{margin-top:16px}
 .banner{font-size:13px;border:1px dashed var(--line);border-radius:8px;padding:8px 10px;margin-top:10px;color:var(--muted)}
 details summary{cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
 .mt{margin-top:10px}.mt0{margin-top:0}
 
 /* the preview: a dark "room" with one bulb per light */
+.flow{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.part{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card)}
+.ptag{font:700 11px ui-monospace,Menlo,Consolas,monospace;text-transform:uppercase;letter-spacing:.04em;text-align:center;padding:3px 0;border-radius:6px;background:var(--code);color:var(--muted)}
+.trig .ptag{background:var(--accent);color:var(--accent-ink)}
+.act .ptag{background:var(--accent-soft);color:var(--accent)}
+.part.cond{background:var(--code)}
+.cond>.ptag{background:var(--ink);color:var(--card)}
+.pname{font-size:15px}
+.where{font-size:12.5px;color:var(--muted)}
+.where::before{content:"· in "}
+.pwhat{font-size:13.5px;color:var(--muted);margin:3px 0 6px}
+.pwhat code,.pwhat b{color:var(--ink)}
+.pwhat code{word-break:normal;white-space:nowrap}
+.fields{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;margin:4px 0;align-items:baseline}
+.fields dt{font-size:12.5px;color:var(--muted)}
+.fields dd{margin:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.fields dd code{word-break:break-all;min-width:0}
+.ticks{margin:6px 0 0;padding-left:18px;font-size:13.5px}
+.ticks li{margin:3px 0}
+.flow.inner{margin:8px 0 2px;padding-left:10px;border-left:3px solid var(--accent)}
+.psend{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.psend .res{padding:0}
 .apps{border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:14px}
 .apps .hint{margin:6px 0}
 .pv-tools{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
@@ -145,6 +169,8 @@ footer p{margin:4px 0}
   #app{grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
   #app button{border-left:0}
   .kv{grid-template-columns:minmax(0,1fr) auto}
+  .part{grid-template-columns:1fr;gap:6px}
+  .ptag{justify-self:start;padding:3px 8px}
   .kv .k{grid-column:1/-1;padding-top:4px}
   .room{grid-template-columns:1fr}
   .scene{aspect-ratio:4/3}
@@ -155,58 +181,62 @@ footer p{margin:4px 0}
 <body>
 <main>
 <h1>Hue NFC Command Builder</h1>
-<p class="sub">Pick lights or rooms, choose what should happen, preview it, and copy the request into the automation app that reads your NFC tag.</p>
+<p class="sub">Tap your phone on an NFC tag and your Hue lights switch. This page builds everything your phone's automation app needs for that, step by step.</p>
+<p class="need"><b>You need:</b> your Hue bridge's IP address · an API key (step 1 shows how to get one) · an NFC tag · an automation app on your phone (step 5).</p>
 <p class="indie">An independent, unofficial tool. I'm not affiliated with Philips, Signify or Philips Hue, and this is not a Hue product.</p>
 
 <section class="card">
-  <h2><span class="step">1</span> Your bridge</h2>
+  <h2><span class="step">1</span> Connect your bridge</h2>
   <div class="row">
-    <label class="f">Bridge IP<input type="text" id="ip" placeholder="192.168.1.20" autocomplete="off" inputmode="decimal" spellcheck="false"></label>
-    <label class="f">Username (API key)<input type="text" id="user" placeholder="AbC123xYz…" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
-    <button id="loadBridge" class="primary">Load from bridge</button>
+    <label class="f">Bridge IP address<input type="text" id="ip" placeholder="e.g. 192.168.1.20" autocomplete="off" inputmode="decimal" spellcheck="false"><span class="fhint">In the Hue app's settings, at your bridge.</span></label>
+    <label class="f">API key (username)<input type="text" id="user" placeholder="e.g. AbC123xYz…" autocomplete="off" spellcheck="false" autocapitalize="off"><span class="fhint">None yet? <a href="#getKey" id="getKeyLink">Get one below.</a></span></label>
   </div>
+
+  <h3 class="h3">Load your lights</h3>
+  <ol class="steps big" id="viaTab" hidden>
+    <li>Tap <a class="btn" id="openData" target="_blank" rel="noopener noreferrer">Open my bridge data ↗</a><br><span class="hint">A new tab shows your lights as text.</span></li>
+    <li>Copy all of it.<br><span class="hint">Long-press the text → <b>Select all</b> → <b>Copy</b>. On an iPhone, double-tap a word first.</span></li>
+    <li>Come back to this tab.<br><span class="hint">Your lights load by themselves. If not, tap <button class="small primary" id="pasteClip">Paste from clipboard</button></span></li>
+  </ol>
+  <div class="msg" id="clipMsg"></div>
+  <p class="loadrow"><span class="hint" id="loadLead" hidden>On a computer, this may work too:</span> <button id="loadBridge" class="primary">Load from bridge</button></p>
   <div class="msg" id="bridgeMsg"></div>
-  <div class="banner" id="viaTab" hidden>
-    <b>On a phone, or if “Load from bridge” doesn't work:</b>
+  <details id="whyTab" hidden><summary>Why the detour through a tab?</summary>
+    <p class="hint mt0">Browsers don't let a website talk to devices in your home network in the background, and phones offer no way to allow it. Opening a page yourself is fine. Your tag isn't affected: your app talks to the bridge directly.</p>
+    <p class="hint">On a computer you can also try this: open <a id="certLink" target="_blank" rel="noopener noreferrer">your bridge over https</a>, accept the certificate warning, come back and tap “Load from bridge”.</p>
+  </details>
+
+  <details id="getKey">
+    <summary>No API key yet? Get one in a minute</summary>
     <ol class="steps">
-      <li><a class="btn" id="openData" target="_blank" rel="noopener noreferrer">Open my bridge data ↗</a><br>Your bridge shows your lights as text in a new tab.</li>
-      <li>Copy all of that text. Android: long-press any of it, tap <b>Select all</b>, then <b>Copy</b>. iPhone: double-tap a word, tap <b>Select All</b>, then <b>Copy</b>.</li>
-      <li>Come back to this tab: your lights usually appear by themselves. If not, tap <button class="primary" id="pasteClip">Paste from clipboard</button></li>
+      <li>On your home Wi-Fi, open <a id="clipLink" target="_blank" rel="noopener noreferrer"><code>http://<span class="ipx">&lt;bridge IP&gt;</span>/debug/clip.html</code></a>. That's a page on your bridge.</li>
+      <li>Into <b>URL</b> type <code>/api</code>. Into <b>Message Body</b> paste <code>{"devicetype":"nfc_tags#phone"}</code> <button class="small" data-copy='{"devicetype":"nfc_tags#phone"}'>Copy</button></li>
+      <li>Press the big round button on top of your bridge, then tap <b>POST</b> within 30 seconds.</li>
+      <li>In the answer (<b>Command Response</b>), copy the long code after <code>"username":</code> and paste it above as your API key.</li>
     </ol>
-    <div class="msg" id="clipMsg"></div>
-    <details><summary>Why?</summary>
-      <p class="hint mt0">Browsers don't let a website talk to devices in your home network in the background, and on phones there's no way to allow it. Opening a page yourself is fine. Your tag isn't affected: your app talks to the bridge directly.</p>
-      <p class="hint">Worth a try on a computer: open <a id="certLink" target="_blank" rel="noopener noreferrer">your bridge over https</a>, accept the certificate warning, come back and tap “Load from bridge”.</p>
-    </details>
-  </div>
-  <details class="mt">
-    <summary>No username yet?</summary>
-    <ol class="steps">
-      <li>Open <code>http://&lt;bridge-ip&gt;/debug/clip.html</code> in a browser on your home Wi-Fi.</li>
-      <li>URL <code>/api</code>, body <code>{"devicetype":"nfc_tags#phone"}</code>.</li>
-      <li>Press the round button on the bridge, then <b>POST</b> within 30 seconds.</li>
-      <li>The response contains <code>"username": "…"</code>: that's your key. Keep it private; anyone on your network with it can control your lights.</li>
-    </ol>
+    <p class="hint">Keep the key private: anyone in your home network who has it can switch your lights.</p>
   </details>
   <details>
-    <summary>…or paste the JSON you got from the CLIP debugger</summary>
-    <p class="hint">Paste the response of <code>/api/&lt;username&gt;/lights</code>, <code>/groups</code>, or the full <code>/api/&lt;username&gt;</code>. You can paste lights and groups one after the other: they get merged.</p>
-    <textarea id="paste" placeholder='{"1":{"state":{"on":true,"bri":254,...},"type":"Extended color light","name":"Desk lamp",...}}'></textarea>
-    <div class="row mt"><button id="readPaste" class="primary">Read JSON</button><button id="clearData">Clear loaded data</button></div>
+    <summary>Paste your bridge data by hand</summary>
+    <p class="hint">Paste the answer of <code>/api/&lt;API key&gt;</code> (everything), or of <code>/lights</code> and <code>/groups</code> one after the other: they're merged.</p>
+    <textarea id="paste" placeholder='{"lights":{"1":{"state":{"on":true,...},"name":"Desk lamp",...}},"groups":{...}}'></textarea>
+    <div class="row mt"><button id="readPaste" class="primary">Read it</button><button id="clearData">Clear loaded data</button></div>
     <div class="msg" id="pasteMsg"></div>
   </details>
 </section>
 
 <section class="card">
-  <h2><span class="step">2</span> What should the tag control?</h2>
+  <h2><span class="step">2</span> Choose lights or rooms</h2>
+  <p class="hint mt0">Tap to select. A room switches all its lights with one request.</p>
   <div id="targets"><div class="empty">Load or paste your bridge data first.</div></div>
 </section>
 
 <section class="card">
-  <h2><span class="step">3</span> What should happen?</h2>
-  <div class="opt"><span class="lbl">Power</span>
-    <div class="seg" id="power"><button data-v="toggle" class="on">Toggle on/off</button><button data-v="on">Turn on</button><button data-v="off">Turn off</button></div>
+  <h2><span class="step">3</span> Choose what a tap does</h2>
+  <div class="opt"><span class="lbl">A tap</span>
+    <div class="seg" id="power"><button data-v="toggle" class="on">Toggles on/off</button><button data-v="on">Turns on</button><button data-v="off">Turns off</button></div>
   </div>
+  <p class="hint" id="powerHint"></p>
   <div id="onOpts">
     <div class="opt" id="briRow"><span class="lbl"><label><input type="checkbox" id="useBri" checked> Brightness</label></span>
       <input type="range" id="bri" min="1" max="254" value="254"><span class="val" id="briVal">100%</span></div>
@@ -260,17 +290,17 @@ footer p{margin:4px 0}
     <div class="scene-empty" id="sceneEmpty">Select a light or room to see it here.</div>
   </div>
   <div class="room" id="preview"></div>
-  <p class="hint">Where your lamps really are, the page can't know: a lightstrip glows behind the sofa, floor and table lamps stand where they'd usually be, everything else hangs from the ceiling. Each light does only what <i>it</i> can do: a white bulb ignores a colour, colour bulbs only reach the colours their hardware can make. A screen can't show light exactly, so take it as a close guide.</p>
+  <p class="hint">Each lamp stands where that kind of lamp usually does: strips behind the sofa, floor and table lamps at the sides, the rest on the ceiling. Each light does only what it can: a white bulb ignores a colour, a colour bulb shows the closest colour it can make. A screen can't show light exactly, so take it as a close guide.</p>
 </section>
 
 <section class="card">
-  <h2><span class="step">5</span> Requests for your tag</h2>
+  <h2><span class="step">5</span> Set it up in your app</h2>
   <div class="apps">
     <div class="opt mt0"><span class="lbl">Your app</span>
       <div class="seg" id="app"><button data-v="macrodroid" class="on">MacroDroid</button><button data-v="tasker">Tasker</button><button data-v="automate">Automate</button><button data-v="shortcuts">iPhone Shortcuts</button></div>
     </div>
     <p class="hint" id="appPrice"></p>
-    <p class="hint">Any app that can react to an NFC tag and send a web request (PUT with a JSON body) works; these are just common ones. This is no advertisement: I have no connection to any of them and get nothing from them. Prices and limits can change, so check the app store.</p>
+    <p class="hint">Not an ad: I have no connection to these apps and get nothing from them. Any app that reacts to NFC tags and sends web requests works. Prices can change.</p>
   </div>
   <div id="output"><div class="empty">Select at least one light or room.</div></div>
 </section>
@@ -384,10 +414,19 @@ function updateLinks(){
   const b=base(true),ip=$('#ip').value.trim();
   const a=$('#openData');if(b){a.href=b;a.removeAttribute('aria-disabled')}else{a.removeAttribute('href');a.setAttribute('aria-disabled','true')}
   const c=$('#certLink');if(ip)c.href=`https://${ip}/api/config`;else c.removeAttribute('href');
+  const k=$('#clipLink');if(ip)k.href=`http://${ip}/debug/clip.html`;else k.removeAttribute('href');
+  $('.ipx').textContent=ip||'<bridge IP>';
 }
 // after "Open my bridge data": when you come back to this tab, the clipboard is read once by itself (browsers that
 // allow it without a tap, e.g. Chrome on Android after asking once); if it holds the bridge's data, it's loaded
 let awaitingClip=false;
+$('#getKeyLink').addEventListener('click',()=>{$('#getKey').open=true});
+// any Copy button outside step 5 (step 5 has its own handler)
+document.addEventListener('click',e=>{const t=e.target.closest('[data-copy]');if(!t||t.closest('#output'))return;copyText(t,t.dataset.copy)});
+async function copyText(btn,txt){
+  try{await navigator.clipboard.writeText(txt)}catch(_){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(__){}ta.remove()}
+  const o=btn.textContent;btn.textContent='Copied';setTimeout(()=>btn.textContent=o,1200);
+}
 $('#openData').addEventListener('click',e=>{if(!base(true)){e.preventDefault();const m=$('#clipMsg');m.className='msg err';m.textContent='Enter the bridge IP and username first.';return}awaitingClip=true});
 function loadBridgeText(text){
   const obj=JSON.parse(text);
@@ -476,6 +515,7 @@ function selCaps(){const c={bri:false,ct:false,xy:false},add=k=>{c.bri||=k.bri;c
   S.selL.forEach(id=>add(caps(S.lights[id])));S.selG.forEach(id=>add(groupCaps(id)));return c}
 function renderAction(){
   $('#onOpts').hidden=S.power==='off';
+  $('#powerHint').textContent={toggle:'Turns the lights on if they’re off, and off if they’re on.',on:'Always turns the lights on, with the settings below.',off:'Always turns the lights off.'}[S.power];
   $('#pvCase').hidden=S.power!=='toggle';
   $('#briVal').textContent=Math.round($('#bri').value/254*100)+'%';
   const m=+$('#ct').value;$('#ctVal').textContent=Math.round(1e6/m/100)*100+' K';
@@ -639,40 +679,46 @@ $('#playFade').onclick=()=>{
   requestAnimationFrame(()=>requestAnimationFrame(()=>{setDuration(secs);paintScene('after')}));
 };
 
-/* ---------- the automation apps: how to set each one up ---------- */
+/* ---------- the automation apps: what each part is called and where it is ---------- */
+// trigger: the NFC trigger; req: the web-request action; fields: how its content type is set; ifc/els/end: the If
 const APPS={
-  macrodroid:{req:'Each request: action <b>HTTP Request</b>, method <b>PUT</b>, paste the URL, content type <code>application/json</code>, paste the body.',
-    price:'Android. Free for up to 5 macros (with ads); MacroDroid Pro, a one-time purchase, removes the limit.',
-    action:'<b>HTTP Request</b> action',
-    setup:'Trigger <b>NFC Tag</b> (scan and name your tag) → Action <b>HTTP Request</b>: method <b>PUT</b>, paste the URL, content type <code>application/json</code>, paste the body.',
-    trigger:'Trigger: <b>NFC Tag</b> (scan and name your tag).',
-    get:u=>`Action: <b>HTTP Request</b> · GET <code>${u}</code> · tick <i>Save HTTP response</i> into a string variable <code>hue_state</code>.`,
-    test:n=>`Action: <b>If</b> → condition <i>String variable</i> <code>hue_state</code> <b>contains</b> <code>${n}</code>`,
-    put:'HTTP Request · PUT',else:'<b>Else</b>',end:'<b>End If</b>'},
-  tasker:{req:'Each request: <b>Net → HTTP Request</b>, method <b>PUT</b>, paste the URL and the body, header <code>Content-Type:application/json</code>.',
-    price:'Android. Paid (a one-time purchase); the developer offers a free trial on their website.',
-    action:'<b>HTTP Request</b> action in the task',
-    setup:'New profile: <b>Event → Net → NFC Tag</b> (scan your tag) → new task with <b>Net → HTTP Request</b>: method <b>PUT</b>, paste the URL, paste the body, header <code>Content-Type:application/json</code>.',
-    trigger:'Profile: <b>Event → Net → NFC Tag</b> (scan your tag), with a new task:',
-    get:u=>`<b>Net → HTTP Request</b> · GET <code>${u}</code>. The answer lands in <code>%http_data</code>.`,
-    test:n=>`<b>If</b> <code>%http_data</code> <b>~</b> <code>*${n}*</code> (matches)`,pattern:n=>`*${n}*`,
-    put:'Net → HTTP Request · PUT',else:'<b>Else</b>',end:'<b>End If</b>'},
-  automate:{req:'Each request: an <b>HTTP request</b> block, method <b>PUT</b>, paste the URL, request content type <b>JSON</b>, paste the body.',
-    price:'Android. Free, with a limit on how many blocks can run at once; a premium upgrade removes the limit.',
-    action:'<b>HTTP request</b> block',
-    setup:'New flow: an <b>NFC tag</b> block (scan your tag) → an <b>HTTP request</b> block: method <b>PUT</b>, paste the URL, request content type <b>JSON</b> (<code>application/json</code>), paste the body.',
-    trigger:'Flow: start with an <b>NFC tag</b> block (scan your tag).',
-    get:u=>`<b>HTTP request</b> block · GET <code>${u}</code> · save the response content in a variable <code>hue_state</code>.`,
-    test:n=>`<b>Expression true?</b> block: does <code>hue_state</code> contain <code>${n}</code>?`,
-    put:'HTTP request block · PUT',else:'<b>No</b> path',end:'(both paths end the flow)',yes:'<b>Yes</b> path'},
-  shortcuts:{req:'Each request: a <b>Text</b> action with the body, then <b>Get Contents of URL</b>: the URL, Method <b>PUT</b>, Header <code>Content-Type</code> = <code>application/json</code>, Request Body <b>File</b> → the Text.',
-    price:'iPhone. Free, built into iOS. NFC automations need an iPhone XS or newer.',
-    action:'<b>Get Contents of URL</b> action',
-    setup:'Shortcuts app → <b>Automation</b> → <b>NFC</b> (scan your tag, set it to run immediately) → a <b>Text</b> action with the body → <b>Get Contents of URL</b>: paste the URL, Method <b>PUT</b>, Header <code>Content-Type</code> = <code>application/json</code>, Request Body <b>File</b> → the Text.',
-    trigger:'Shortcuts → <b>Automation</b> → <b>NFC</b> (scan your tag, set it to run immediately).',
-    get:u=>`<b>Get Contents of URL</b> <code>${u}</code> (Method GET).`,
-    test:n=>`<b>If</b> <i>Contents of URL</i> <b>contains</b> <code>${n}</code>`,
-    put:'Text with the body → Get Contents of URL · PUT',else:'<b>Otherwise</b>',end:'<b>End If</b>'},
+  macrodroid:{price:'Android. Free for up to 5 macros (with ads); MacroDroid Pro, a one-time purchase, removes the limit.',
+    start:'Create a new macro.',
+    trigger:{name:'NFC Tag',kind:'Trigger',how:'Scan your tag and give it a name.'},
+    req:{name:'HTTP Request',where:'Connectivity'},
+    fields:{type:'Content type'},
+    getTicks:['Tick <b>Block next actions until complete</b>, so the If waits for the answer.','Tick <b>Save HTTP response in variable</b> and create a new <b>String</b> variable <code>hue_state</code>.'],
+    ifc:{name:'If Clause',where:'Conditions/Loops',cond:n=>`Add the condition <b>MacroDroid Variables</b>: <code>hue_state</code> · <b>Contains</b> · ${n}`},
+    els:{name:'Else',where:'Conditions/Loops'},
+    end:{name:'End If',how:'MacroDroid adds it together with the If.'},
+    tip:'New actions go to the end of the list: long-press one and drag it to its place.'},
+  tasker:{price:'Android. Paid (a one-time purchase); the developer offers a free trial on their website.',
+    start:'Create a new profile.',
+    trigger:{name:'NFC Tag',kind:'Profile',how:'Event → Net → NFC Tag. Scan your tag. Then give the profile a new task and add the actions below to it.'},
+    req:{name:'HTTP Request',where:'Net'},
+    fields:{type:'Headers',typeValue:'Content-Type:application/json'},
+    getTicks:['Tasker stores the answer in <code>%http_data</code> by itself.'],
+    ifc:{name:'If',where:'Task',cond:n=>`Condition: <code>%http_data</code> <b>~</b> (matches) ${n}`,pattern:n=>`*${n}*`},
+    els:{name:'Else',where:'Task'},
+    end:{name:'End If',where:'Task'}},
+  automate:{price:'Android. Free, with a limit on how many blocks can run at once; a premium upgrade removes the limit.',
+    start:'Create a new flow.',
+    trigger:{name:'NFC tag',kind:'Block',how:'Start the flow with it and scan your tag.'},
+    req:{name:'HTTP request',where:'the blocks'},
+    fields:{type:'Request content type'},
+    getTicks:['Save the <b>response content</b> in a variable <code>hue_state</code>.'],
+    ifc:{name:'Expression true?',where:'the blocks',cond:n=>`Expression: does <code>hue_state</code> contain ${n}? Connect the requests below to its <b>Yes</b> path.`},
+    els:{name:'No path',how:'Connect the requests below to the <b>No</b> path of the same block.'},
+    end:null},
+  shortcuts:{price:'iPhone. Free, built into iOS. NFC automations need an iPhone XS or newer.',
+    start:'In the Shortcuts app: Automation → New.',
+    trigger:{name:'NFC',kind:'Automation',how:'Scan your tag and set the automation to <b>Run immediately</b>.'},
+    req:{name:'Get Contents of URL',where:''},
+    fields:{type:'Headers',typeValue:'Content-Type: application/json',body:'Request Body: <b>File</b> → a <b>Text</b> action placed right before it, holding the body.'},
+    getTicks:['Its result is called <i>Contents of URL</i>.'],
+    ifc:{name:'If',where:'',cond:n=>`Condition: <i>Contents of URL</i> <b>contains</b> ${n}`},
+    els:{name:'Otherwise',how:'Shortcuts adds it together with the If.'},
+    end:{name:'End If',how:'Shortcuts adds it together with the If.'}},
 };
 S.app=APPS[store.get('hue_app')]?store.get('hue_app'):'macrodroid';
 document.querySelectorAll('#app button').forEach(x=>x.classList.toggle('on',x.dataset.v===S.app));
@@ -685,59 +731,49 @@ function requests(forceOn){const b=base(false),out=[];
   [...S.selL].sort(num).forEach(id=>out.push({label:'Light: '+(S.lights[id].name||id),method:'PUT',url:`${b}/lights/${id}/state`,body:bodyFor(caps(S.lights[id]),forceOn),kind:'l',id}));
   return out}
 let REQ=[];
-function reqHtml(r,i,prefix){return `<div class="req"><div class="hd"><span class="m">${r.method}</span><span class="lab">${esc(r.label)}</span>
-  <button class="small" data-send="${prefix}${i}">Send now</button></div>
-  <div class="kv"><span class="k">URL</span><code>${esc(r.url)}</code><button class="small" data-copy="${esc(r.url)}">Copy</button>
-  ${r.body!==undefined?`<span class="k">Body</span><code>${esc(JSON.stringify(r.body))}</code><button class="small" data-copy="${esc(JSON.stringify(r.body))}">Copy</button>`:''}</div>
-  <div class="res" id="res-${prefix}${i}"></div></div>`}
+const cp=t=>`<button class="small" data-copy="${esc(t)}">Copy</button>`;
+const where=w=>w?` <span class="where">${w}</span>`:'';
+// one part of the automation: a tag (Trigger, Action, If …), its name, where to find it, and what to fill in
+function part(tag,cls,name,w,inner){return `<li class="part ${cls}"><span class="ptag">${tag}</span><div class="pbody"><div class="pname"><b>${name}</b>${where(w)}</div>${inner||''}</div></li>`}
+function fieldsHtml(rows){return `<dl class="fields">${rows.map(([k,v,c])=>`<dt>${k}</dt><dd>${v}${c!==undefined?cp(c):''}</dd>`).join('')}</dl>`}
+function putPart(A,r,i,what){
+  const body=JSON.stringify(r.body),F=A.fields;
+  const rows=[['Method','<b>PUT</b>'],['URL',`<code>${esc(r.url)}</code>`,r.url],[F.type,`<code>${esc(F.typeValue||'application/json')}</code>`],['Body',`<code>${esc(body)}</code>`,body]];
+  return part('Action','act',A.req.name,A.req.where,`<p class="pwhat">${esc(r.label)}${what?' · '+what:''}</p>${fieldsHtml(rows)}${F.body?`<p class="hint">${F.body}</p>`:''}<div class="psend"><button class="small" data-send="r${i}">Send now</button><span class="res" id="res-r${i}"></span></div>`);
+}
 function renderOutput(){
   $('#appPrice').textContent=APPS[S.app].price;
-  const o=$('#output');REQ=requests(false);
+  const o=$('#output'),A=APPS[S.app];REQ=requests(false);
   if(!REQ.length){o.innerHTML='<div class="empty">Select at least one light or room.</div>';return}
-  let h='';
-  const A=APPS[S.app];
-  if(S.power==='toggle') h+=toggleHtml(A);
-  else{
-    if(REQ.length>1) h+=`<p class="hint mt0">${REQ.length} requests: add one ${A.action} per box. <button class="small" id="sendAll">Send all now</button></p>`;
-    h+=REQ.map((r,i)=>reqHtml(r,i,'r')).join('');
-    h+=`<p class="hint">${A.setup}</p>`;
-  }
+  let h=`<p class="hint mt0">${A.start} Then add these parts, in this order:</p><ol class="flow">`;
+  h+=part(A.trigger.kind,'trig',A.trigger.name,'',`<p class="pwhat">${A.trigger.how}</p>`);
+  if(S.power==='toggle'){
+    // the Hue API has no toggle command: the app first asks whether the (first) light or room is on
+    const on=requests(true),off=on.map(r=>Object.assign({},r,{body:offBody()})),lead=on[0],b=base(false);
+    REQ=[...off,...on];
+    const getUrl=lead.kind==='g'?`${b}/groups/${lead.id}`:`${b}/lights/${lead.id}`,needle=lead.kind==='g'?'"any_on":true':'"on":true';
+    const pat=A.ifc.pattern?A.ifc.pattern(needle):needle;
+    h+=part('Action','act',A.req.name,A.req.where,`<p class="pwhat">Asks the bridge whether ${esc(lead.label.replace(/^\w+: /,''))} is on${on.length>1?' (the first one decides for all)':''}.</p>${fieldsHtml([['Method','<b>GET</b>'],['URL',`<code>${esc(getUrl)}</code>`,getUrl]])}<ul class="ticks">${A.getTicks.map(t=>`<li>${t}</li>`).join('')}</ul>`);
+    h+=part('If','cond',A.ifc.name,A.ifc.where,`<p class="pwhat">${A.ifc.cond(`<code>${esc(pat)}</code> ${cp(pat)}`)}</p><p class="pwhat"><b>Inside the If</b> (the lights are on):</p><ol class="flow inner">${off.map((r,i)=>putPart(A,r,i,'turns off')).join('')}</ol>`);
+    h+=part(A.end?'Else':'No','cond',A.els.name,A.els.where,`${A.els.how?`<p class="pwhat">${A.els.how}</p>`:''}<p class="pwhat"><b>After the ${esc(A.els.name.replace(' path',''))}</b> (the lights are off):</p><ol class="flow inner">${on.map((r,i)=>putPart(A,r,off.length+i,'turns on')).join('')}</ol>`);
+    if(A.end) h+=part('End','cond',A.end.name,A.end.where,A.end.how?`<p class="pwhat">${A.end.how}</p>`:'');
+  } else h+=REQ.map((r,i)=>putPart(A,r,i,'')).join('');
+  h+='</ol>';
+  if(A.tip) h+=`<p class="hint">Tip: ${A.tip}</p>`;
+  if(S.power!=='toggle'&&REQ.length>1) h+=`<p class="hint"><button class="small" id="sendAll">Send all now</button> to try them all from here.</p>`;
 
   // group helper
   if(S.selL.size>=2){const ids=[...S.selL].sort(num);
     const body={name:($('#gname')&&$('#gname').value)||'NFC tag',type:'LightGroup',lights:ids};
     h+=`<div class="sectionlabel">Tidier: one request instead of ${S.selL.size}</div>
-    <p class="hint mt0">Save these lights as a group on the bridge. Then one request controls them all${S.power==='toggle'?', and the group being on or off decides the toggle':''}.</p>
+    <p class="hint mt0">Save these lights as a group on the bridge. Then one request switches them all${S.power==='toggle'?', and the group being on or off decides the toggle':''}.</p>
     <div class="row"><label class="f">Group name<input type="text" id="gname" value="${esc(body.name)}"></label><button class="primary" id="mkGroup">Create group on bridge</button></div>
     <div class="msg" id="gMsg"></div>
     <details><summary>Do it by hand in the CLIP debugger instead</summary><div class="kv"><span class="k">POST</span><code>${esc(base(false)+'/groups')}</code><span></span><span class="k">Body</span><code id="gBody">${esc(JSON.stringify(body))}</code><button class="small" data-copy-id="gBody">Copy</button></div>
-    <p class="hint">Then GET <code>/groups</code> again and paste it above: the new group appears under Rooms &amp; groups.</p></details>`;
+    <p class="hint">Then load your lights again (step 1): the new group appears under the rooms.</p></details>`;
   }
-
   o.innerHTML=h;
   const gn=$('#gname');if(gn)gn.oninput=()=>{const el=$('#gBody');if(el)el.textContent=JSON.stringify({name:gn.value||'NFC tag',type:'LightGroup',lights:[...S.selL].sort(num)})};
-}
-// Toggle: the app asks the bridge whether the first light or room is on, then sends the "off" or the "on" requests.
-// (The Hue API has no toggle command: a request always sets a state, so the decision has to happen in the app.)
-function toggleHtml(A){
-  const on=requests(true),off=on.map(r=>Object.assign({},r,{body:offBody()})),lead=on[0],b=base(false);
-  REQ=[...off,...on];
-  const getUrl=lead.kind==='g'?`${b}/groups/${lead.id}`:`${b}/lights/${lead.id}`,needle=lead.kind==='g'?'"any_on":true':'"on":true';
-  const cp=t=>` <button class="small" data-copy="${esc(t)}">Copy</button>`;
-  const many=on.length>1;
-  return `<p class="hint mt0">One tag, both ways: your app first asks the bridge whether <b>${esc(lead.label.replace(/^\w+: /,''))}</b> is on${many?' (the first one decides for all)':''}, then sends the matching ${many?'requests':'request'}. The Hue API has no “toggle” command, so this check happens in your app.</p>
-  <ol class="steps">
-    <li>${A.trigger}</li>
-    <li>${A.get(esc(getUrl))}${cp(getUrl)}</li>
-    <li>${A.test(esc(needle))}${cp(A.pattern?A.pattern(needle):needle)}</li>
-    <li>&nbsp;&nbsp;${A.yes?A.yes+': ':''}the ${many?'requests':'request'} under <b>If it’s on: turn off</b></li>
-    <li>${A.else}</li>
-    <li>&nbsp;&nbsp;the ${many?'requests':'request'} under <b>Otherwise: turn on</b></li>
-    <li>${A.end}</li>
-  </ol>
-  <p class="hint">${A.req}</p>
-  <div class="sectionlabel">If it’s on: turn off</div>${off.map((r,i)=>reqHtml(r,i,'r')).join('')}
-  <div class="sectionlabel">Otherwise: turn on</div>${on.map((r,i)=>reqHtml(r,off.length+i,'r')).join('')}`;
 }
 function showRes(el,data,err){
   if(err){el.style.color='var(--err)';el.textContent=err;return}
@@ -745,15 +781,14 @@ function showRes(el,data,err){
   el.style.color=bad.length?'var(--err)':'var(--ok)';
   el.textContent=bad.length?'Error: '+bad.map(x=>x.error.description).join('; '):'✓ Done';
 }
-async function sendOne(i){const r=REQ[i],el=$('#res-r'+i);
+async function sendOne(i){const r=REQ[i],el=$('#res-r'+i);if(!el)return false;
   if(!base(true)){showRes(el,null,'Enter the bridge IP and username at the top first.');return false}
   el.style.color='';el.textContent='Sending…';
   try{showRes(el,await call(r.method,r.url,r.body));return true}catch(e){showRes(el,null,liveErr(e,true));return false}}
 $('#output').addEventListener('click',async e=>{
   const t=e.target;
   if(t.dataset.copy!==undefined||t.dataset.copyId){const txt=t.dataset.copyId?$('#'+t.dataset.copyId).textContent:t.dataset.copy;
-    try{await navigator.clipboard.writeText(txt)}catch(_){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(__){}ta.remove()}
-    const o=t.textContent;t.textContent='Copied';setTimeout(()=>t.textContent=o,1200);return}
+    copyText(t,txt);return}
   if(t.dataset.send){if(await sendOne(+t.dataset.send.slice(1)))refreshSoon();return}
   if(t.id==='sendAll'){for(let i=0;i<REQ.length;i++)await sendOne(i);refreshSoon();return}
   if(t.id==='mkGroup'){const m=$('#gMsg'),b=base(true);
@@ -778,7 +813,9 @@ function render(){keepSelection();renderTargets();renderAction();renderPreview()
 (function init(){
   try{const d=JSON.parse(store.get('hue_data')||'null');if(d){S.lights=d.lights||{};S.groups=d.groups||{}}}catch(e){}
   try{const d=JSON.parse(store.get('hue_sel')||'null');if(d){S.selL=new Set((d.lights||[]).map(String));S.selG=new Set((d.groups||[]).map(String))}}catch(e){}
-  $('#viaTab').hidden=!hosted;
+  // on the website the tab route comes first ("Load from bridge" rarely works there); in a downloaded file, Load
+  $('#viaTab').hidden=$('#whyTab').hidden=$('#loadLead').hidden=!hosted;
+  $('#loadBridge').classList.toggle('primary',!hosted);
   render();
 })();
 </script>
